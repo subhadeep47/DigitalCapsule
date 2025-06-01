@@ -24,7 +24,7 @@ const api = {
               unlockDate: "2025-06-15T00:00:00",
               recipientEmail: "friend@example.com",
               status: "locked",
-              createdAt: "2023-05-10T14:30:00",
+              createdAt: "2025-05-10T14:30:00",
               mediaCount: 5,
               message: "Hope you enjoy these memories from our special day!",
             },
