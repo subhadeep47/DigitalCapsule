@@ -94,7 +94,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white">Capsule Contents</h3>
 
-              {/* Mock message */}
+              {/* Message */}
               {capsule.message && (
                 <div className="bg-slate-900/50 p-4 rounded-lg">
                   <h4 className="font-medium text-indigo-400 mb-2">Personal Message</h4>
@@ -102,7 +102,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
                 </div>
               )}
 
-              {/* Mock files */}
+              {/* Files */}
               <div className="space-y-2">
                 <h4 className="font-medium text-indigo-400">Files</h4>
                 <div className="space-y-2">

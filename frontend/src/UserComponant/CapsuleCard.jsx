@@ -6,8 +6,11 @@ import { Badge } from "../Componants/UiElements/badge"
 import { Button } from "../Componants/UiElements/button"
 import { Progress } from "../Componants/UiElements/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../Componants/UiElements/dropDown-menu"
+import { useState } from "react"
 
-const CapsuleCard = ({ capsule, index, onViewDetails, onDelete }) => {
+const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
   const calculateTimeRemaining = (unlockDate) => {
     const now = new Date()
     const unlock = new Date(unlockDate)
@@ -33,52 +36,57 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete }) => {
 
   const isUnlocked = new Date(capsule.unlockDate) <= new Date()
 
+  const handleViewDetails = () => {
+    onViewDetails(capsule)
+  }
+
+  const handleDelete = () => {
+    onDelete(capsule.id)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
     >
-      <Card
-        className="bg-slate-800/50 border-slate-700 text-white h-full flex flex-col overflow-hidden group hover:border-indigo-500 transition-all cursor-pointer"
-        onClick={() => onViewDetails(capsule)}
-      >
+      <Card className="bg-slate-800/50 border-slate-700 text-white h-full flex flex-col overflow-hidden group hover:border-indigo-500 transition-all">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <Badge variant={isUnlocked ? "default" : "secondary"} className="mb-2">
               {isUnlocked ? "Unlocked" : "Locked"}
             </Badge>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700 text-white">
                 <DropdownMenuItem
-                  className="text-white hover:bg-slate-700 focus:bg-slate-700"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onViewDetails(capsule)
-                  }}
+                  className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
+                  onClick={handleViewDetails}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-red-400 hover:bg-red-900/30 focus:bg-red-900/30"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(capsule.id)
-                  }}
+                  className="text-red-400 hover:bg-red-900/30 focus:bg-red-900/30 cursor-pointer"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
                 >
                   <Trash className="mr-2 h-4 w-4" />
-                  Delete Capsule
+                  {isDeleting ? "Deleting..." : "Delete Capsule"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CardTitle className="text-xl group-hover:text-indigo-400 transition-colors">{capsule.title}</CardTitle>
+          <CardTitle
+            className="text-xl group-hover:text-indigo-400 transition-colors cursor-pointer"
+            onClick={handleViewDetails}
+          >
+            {capsule.title}
+          </CardTitle>
           <CardDescription className="text-slate-400 line-clamp-2">{capsule.description}</CardDescription>
         </CardHeader>
         <CardContent className="flex-1">

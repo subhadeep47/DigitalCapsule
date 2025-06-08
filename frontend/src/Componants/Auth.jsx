@@ -14,8 +14,9 @@ const Auth = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    const user = localStorage.getItem("isLoggedIn"); // Replace with your auth logic
+    const user = localStorage.getItem("isLoggedIn");
     if (user) {
+      dispatchAction(dispatch, ACTION_TYPES.LOGIN);
       navigate("/dashboard");
     }
   }, [navigate]);

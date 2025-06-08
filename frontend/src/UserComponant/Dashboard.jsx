@@ -10,6 +10,8 @@ import StatsCard from "./dashboard/StatsCard"
 import CapsuleGrid from "./dashboard/CapsuleGrid"
 import EmptyState from "./dashboard/EmptyState"
 import CapsuleDetailModal from "./CapsuleDetailModal"
+import { useDispatch, useSelector } from "react-redux"
+import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
 
 // Mock API with fixed data
 const api = {
@@ -58,31 +60,47 @@ const api = {
 }
 
 const Dashboard = () => {
-  const [myCapsules, setMyCapsules] = useState([])
-  const [receivedCapsules, setReceivedCapsules] = useState([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedCapsule, setSelectedCapsule] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const dispatch = useDispatch()
+  const { myCapsules, receivedCapsules, selectedCapsule, isModalOpen, searchQuery, activeTab, error } = useSelector(
+    (state) => state.capsules,
+  )
+  const { isLoggedIn } = useSelector((state) => state.auth)
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn")
+  // Local loading states
+  const [isLoadingMyCapsules, setIsLoadingMyCapsules] = useState(false)
+  const [isLoadingReceivedCapsules, setIsLoadingReceivedCapsules] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (isLoggedIn) {
-      setIsLoading(true)
-
-      Promise.all([api.get("/api/capsules/created"), api.get("/api/capsules/received")])
-        .then(([createdRes, receivedRes]) => {
-          setMyCapsules(createdRes.data)
-          setReceivedCapsules(receivedRes.data)
-        })
-        .catch((err) => console.error("Fetch error:", err))
-        .finally(() => setIsLoading(false))
+      fetchCapsules()
     } else {
       window.location.href = "/"
     }
   }, [isLoggedIn])
 
+  const fetchCapsules = async () => {
+    try {
+      // Fetch my capsules
+      setIsLoadingMyCapsules(true)
+      const myCapsulesResponse = await api.get("/api/capsules/created")
+      dispatchAction(dispatch, ACTION_TYPES.SET_MY_CAPSULES, myCapsulesResponse.data)
+      setIsLoadingMyCapsules(false)
+
+      // Fetch received capsules
+      setIsLoadingReceivedCapsules(true)
+      const receivedCapsulesResponse = await api.get("/api/capsules/received")
+      dispatchAction(dispatch, ACTION_TYPES.SET_RECEIVED_CAPSULES, receivedCapsulesResponse.data)
+      setIsLoadingReceivedCapsules(false)
+    } catch (error) {
+      console.error("Error fetching capsules:", error)
+      dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error.message)
+      setIsLoadingMyCapsules(false)
+      setIsLoadingReceivedCapsules(false)
+    }
+  }
+
+  // Filter capsules based on search query
   const filteredMyCapsules = myCapsules.filter(
     (capsule) =>
       capsule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -100,16 +118,33 @@ const Dashboard = () => {
   }
 
   const handleViewDetails = (capsule) => {
-    setSelectedCapsule(capsule)
-    setIsModalOpen(true)
+    dispatchAction(dispatch, ACTION_TYPES.SET_SELECTED_CAPSULE, capsule)
+    dispatchAction(dispatch, ACTION_TYPES.SET_MODAL_OPEN, true)
   }
 
-  const handleDeleteCapsule = (capsuleId) => {
-    // Implement delete functionality
-    console.log("Delete capsule:", capsuleId)
-    // Remove from state for demo
-    setMyCapsules(myCapsules.filter((c) => c.id !== capsuleId))
-    setReceivedCapsules(receivedCapsules.filter((c) => c.id !== capsuleId))
+  const handleDeleteCapsule = async (capsuleId) => {
+    try {
+      setIsDeleting(true)
+      await api.delete(`/api/capsules/${capsuleId}`)
+      dispatchAction(dispatch, ACTION_TYPES.REMOVE_CAPSULE, capsuleId)
+      setIsDeleting(false)
+    } catch (error) {
+      console.error("Error deleting capsule:", error)
+      dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error.message)
+      setIsDeleting(false)
+    }
+  }
+
+  const handleSearchChange = (e) => {
+    dispatchAction(dispatch, ACTION_TYPES.SET_SEARCH_QUERY, e.target.value)
+  }
+
+  const handleTabChange = (value) => {
+    dispatchAction(dispatch, ACTION_TYPES.SET_ACTIVE_TAB, value)
+  }
+
+  const handleCloseModal = () => {
+    dispatchAction(dispatch, ACTION_TYPES.SET_MODAL_OPEN, false)
   }
 
   if (!isLoggedIn) return null
@@ -132,7 +167,7 @@ const Dashboard = () => {
                 placeholder="Search capsules..."
                 className="pl-8 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 w-full"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
             <Button onClick={navigateToCreateCapsule} className="bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -145,22 +180,24 @@ const Dashboard = () => {
         <StatsCard myCapsules={myCapsules} receivedCapsules={receivedCapsules} />
 
         {/* Tabs for My Capsules and Received Capsules */}
-        <Tabs defaultValue="my-capsules" className="mb-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
           <TabsList className="bg-slate-800/50 border-slate-700">
-            <TabsTrigger value="my-capsules" className="data-[state=active]:bg-indigo-600">
-              My Capsules ({filteredMyCapsules.length})
-            </TabsTrigger>
-            <TabsTrigger value="received" className="data-[state=active]:bg-indigo-600">
-              Shared With Me ({filteredReceivedCapsules.length})
-            </TabsTrigger>
+            <TabsTrigger value="my-capsules">My Capsules ({filteredMyCapsules.length})</TabsTrigger>
+            <TabsTrigger value="received">Shared With Me ({filteredReceivedCapsules.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-capsules" className="mt-4">
-            {filteredMyCapsules.length > 0 ? (
+            {isLoadingMyCapsules ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto"></div>
+                <p className="text-slate-400 mt-2">Loading capsules...</p>
+              </div>
+            ) : filteredMyCapsules.length > 0 ? (
               <CapsuleGrid
                 capsules={filteredMyCapsules}
                 onViewDetails={handleViewDetails}
                 onDelete={handleDeleteCapsule}
+                isDeleting={isDeleting}
               />
             ) : (
               <EmptyState type="created" onCreateCapsule={navigateToCreateCapsule} />
@@ -168,11 +205,17 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="received" className="mt-4">
-            {filteredReceivedCapsules.length > 0 ? (
+            {isLoadingReceivedCapsules ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto"></div>
+                <p className="text-slate-400 mt-2">Loading capsules...</p>
+              </div>
+            ) : filteredReceivedCapsules.length > 0 ? (
               <CapsuleGrid
                 capsules={filteredReceivedCapsules}
                 onViewDetails={handleViewDetails}
                 onDelete={handleDeleteCapsule}
+                isDeleting={isDeleting}
               />
             ) : (
               <EmptyState type="received" />
@@ -180,8 +223,21 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
+            <p>Error: {error}</p>
+            <button
+              onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Capsule Detail Modal */}
-        <CapsuleDetailModal capsule={selectedCapsule} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <CapsuleDetailModal capsule={selectedCapsule} isOpen={isModalOpen} onClose={handleCloseModal} />
       </div>
     </div>
   )
