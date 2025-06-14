@@ -14,8 +14,8 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
   }
 
   const lockedCapsulesCount =
-    myCapsules.filter((c) => new Date(c.unlockDate) > new Date()).length +
-    receivedCapsules.filter((c) => new Date(c.unlockDate) > new Date()).length
+    myCapsules.filter((c) => new Date(c.dateToUnlock) > new Date()).length +
+    receivedCapsules.filter((c) => new Date(c.dateToUnlock) > new Date()).length
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -60,24 +60,24 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
               <div className="text-3xl font-bold">
                 {(() => {
                   const allCapsules = [...myCapsules, ...receivedCapsules]
-                    .filter((c) => new Date(c.unlockDate) > new Date())
-                    .sort((a, b) => new Date(a.unlockDate).getTime() - new Date(b.unlockDate).getTime())
+                    .filter((c) => new Date(c.dateToUnlock) > new Date())
+                    .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())
 
                   if (allCapsules.length === 0) return "None"
 
-                  const nextUnlock = new Date(allCapsules[0].unlockDate)
+                  const nextUnlock = new Date(allCapsules[0].dateToUnlock)
                   return nextUnlock.toLocaleDateString("en-US", { month: "short", day: "numeric" })
                 })()}
               </div>
               <p className="text-slate-400 text-sm">
                 {(() => {
                   const allCapsules = [...myCapsules, ...receivedCapsules]
-                    .filter((c) => new Date(c.unlockDate) > new Date())
-                    .sort((a, b) => new Date(a.unlockDate).getTime() - new Date(b.unlockDate).getTime())
+                    .filter((c) => new Date(c.dateToUnlock) > new Date())
+                    .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())
 
                   if (allCapsules.length === 0) return "No upcoming unlocks"
 
-                  return calculateTimeRemaining(allCapsules[0].unlockDate)
+                  return calculateTimeRemaining(allCapsules[0].dateToUnlock)
                 })()}
               </p>
             </>

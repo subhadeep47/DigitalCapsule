@@ -10,20 +10,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../Componants/UiElem
 import { Calendar as CalendarComponent } from "../../Componants/UiElements/calendar"
 import { format, cn } from "../../Utils/utils"
 
-const BasicDetailsForm = ({
-  title,
-  setTitle,
-  description,
-  setDescription,
-  recipientEmails,
-  setRecipientEmails,
-  unlockDate,
-  setUnlockDate,
-  notifyRecipient,
-  setNotifyRecipient,
-}) => {
+const BasicDetailsForm = ({ capsuleData, setCapsuleData }) => {
   const minDate = new Date()
   minDate.setDate(minDate.getDate() + 1)
+
+  const handleInputChange = (field, value) => {
+    setCapsuleData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleDateSelect = (date) => {
+    handleInputChange("dateToUnlock", date ? date.toISOString() : "")
+  }
+
+  const selectedDate = capsuleData.dateToUnlock ? new Date(capsuleData.dateToUnlock) : undefined
 
   return (
     <Card className="bg-slate-800/50 border-slate-700 text-white">
@@ -34,8 +36,8 @@ const BasicDetailsForm = ({
             <Input
               id="title"
               placeholder="Give your time capsule a name"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={capsuleData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
               className="bg-slate-900/50 border-slate-700 text-white"
               required
             />
@@ -46,8 +48,8 @@ const BasicDetailsForm = ({
             <Textarea
               id="description"
               placeholder="What's this time capsule about?"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={capsuleData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
               className="bg-slate-900/50 border-slate-700 text-white min-h-[80px]"
               required
             />
@@ -62,8 +64,8 @@ const BasicDetailsForm = ({
                   id="recipients"
                   type="text"
                   placeholder="email1@example.com, email2@example.com"
-                  value={recipientEmails}
-                  onChange={(e) => setRecipientEmails(e.target.value)}
+                  value={capsuleData.recipientEmails}
+                  onChange={(e) => handleInputChange("recipientEmails", e.target.value)}
                   className="bg-slate-900/50 border-slate-700 text-white pl-9"
                   required
                 />
@@ -76,22 +78,23 @@ const BasicDetailsForm = ({
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     id="unlock-date"
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal bg-slate-900/50 border-slate-700 text-white hover:bg-slate-800/50",
-                      !unlockDate && "text-slate-400",
+                      !selectedDate && "text-slate-400",
                     )}
                   >
                     <Calendar className="mr-2 h-4 w-4" />
-                    {unlockDate ? format(unlockDate, "PPP") : "Select unlock date"}
+                    {selectedDate ? format(selectedDate, "PPP") : "Select unlock date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-slate-800 border-slate-700" align="start">
                   <CalendarComponent
                     mode="single"
-                    selected={unlockDate}
-                    onSelect={setUnlockDate}
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
                     disabled={(date) => date < minDate}
                     initialFocus
                     className="bg-slate-800 text-white"
@@ -102,7 +105,11 @@ const BasicDetailsForm = ({
           </div>
 
           <div className="flex items-center space-x-2 pt-2">
-            <Switch id="notify" checked={notifyRecipient} onCheckedChange={setNotifyRecipient} />
+            <Switch
+              id="notify"
+              checked={capsuleData.notifyRecipient}
+              onCheckedChange={(checked) => handleInputChange("notifyRecipient", checked)}
+            />
             <Label htmlFor="notify" className="text-sm text-slate-300">
               Notify recipients that a capsule is waiting for them
             </Label>

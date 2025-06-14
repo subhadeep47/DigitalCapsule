@@ -12,52 +12,8 @@ import EmptyState from "./dashboard/EmptyState"
 import CapsuleDetailModal from "./CapsuleDetailModal"
 import { useDispatch, useSelector } from "react-redux"
 import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
+import api from "../Utils/api"
 
-// Mock API with fixed data
-const api = {
-  get: async (url) => {
-    return {
-      data: url.includes("created")
-        ? [
-            {
-              id: 1,
-              title: "Graduation Memories",
-              description: "A collection of memories from our graduation day",
-              unlockDate: "2025-06-15T00:00:00",
-              recipientEmail: "friend@example.com",
-              status: "locked",
-              createdAt: "2025-05-10T14:30:00",
-              mediaCount: 5,
-              message: "Hope you enjoy these memories from our special day!",
-            },
-            {
-              id: 2,
-              title: "Birthday Wishes 2024",
-              description: "Birthday wishes for your 30th birthday",
-              unlockDate: "2023-08-20T00:00:00", // Past date - unlocked
-              recipientEmail: "family@example.com",
-              status: "unlocked",
-              createdAt: "2023-07-25T10:15:00",
-              mediaCount: 3,
-              message: "Happy 30th birthday! Here are some special memories for you.",
-            },
-          ]
-        : [
-            {
-              id: 3,
-              title: "Wedding Memories",
-              description: "Special moments from our wedding day",
-              unlockDate: "2024-07-10T00:00:00",
-              senderEmail: "bestfriend@example.com",
-              status: "locked",
-              createdAt: "2023-07-10T09:45:00",
-              mediaCount: 10,
-              message: "Congratulations on your wedding! These are some beautiful moments from your special day.",
-            },
-          ],
-    }
-  },
-}
 
 const Dashboard = () => {
   const dispatch = useDispatch()

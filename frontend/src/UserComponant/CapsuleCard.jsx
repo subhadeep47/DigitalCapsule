@@ -34,7 +34,7 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
     return Math.round((elapsedTime / totalTime) * 100)
   }
 
-  const isUnlocked = new Date(capsule.unlockDate) <= new Date()
+  const isUnlocked = new Date(capsule.dateToUnlock) <= new Date()
 
   const handleViewDetails = () => {
     onViewDetails(capsule)
@@ -92,13 +92,13 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
         <CardContent className="flex-1">
           <div className="flex items-center text-sm text-slate-400 mb-3">
             <User className="mr-1 h-4 w-4" />
-            <span>{capsule.recipientEmail ? `To: ${capsule.recipientEmail}` : `From: ${capsule.senderEmail}`}</span>
+            <span>{capsule.recipientEmail ? `To: ${capsule.recipientEmail}` : `From: ${capsule.createdBy}`}</span>
           </div>
           <div className="flex items-center text-sm text-slate-400 mb-4">
             <Clock className="mr-1 h-4 w-4" />
             <span>
               Unlocks:{" "}
-              {new Date(capsule.unlockDate).toLocaleDateString("en-US", {
+              {new Date(capsule.dateToUnlock).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -109,10 +109,10 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
             <div className="flex justify-between text-xs">
               <span className="text-slate-400">Progress</span>
               <span className="text-indigo-400 font-medium">
-                {calculateProgress(capsule.createdAt, capsule.unlockDate)}%
+                {calculateProgress(capsule.createdAt, capsule.dateToUnlock)}%
               </span>
             </div>
-            <Progress value={calculateProgress(capsule.createdAt, capsule.unlockDate)} className="h-1.5 bg-slate-700" />
+            <Progress value={calculateProgress(capsule.createdAt, capsule.dateToUnlock)} className="h-1.5 bg-slate-700" />
           </div>
         </CardContent>
         <CardFooter className="border-t border-slate-700 pt-3">
@@ -120,7 +120,7 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
             <div className="text-slate-400">
               {capsule.mediaCount} {capsule.mediaCount === 1 ? "item" : "items"}
             </div>
-            <div className="text-indigo-400 font-medium">{calculateTimeRemaining(capsule.unlockDate)}</div>
+            <div className="text-indigo-400 font-medium">{calculateTimeRemaining(capsule.dateToUnlock)}</div>
           </div>
         </CardFooter>
       </Card>

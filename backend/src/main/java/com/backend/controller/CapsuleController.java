@@ -3,6 +3,7 @@ package com.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.model.Capsules;
 import com.backend.service.CapsuleService;
@@ -37,11 +40,11 @@ public class CapsuleController {
 	        return jwtUtil.extractEmail(token);
 	    }
 
-	    @PostMapping
-	    public ResponseEntity<?> createCapsule(@RequestBody Capsules capsule, HttpServletRequest request) {
+	    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	    public ResponseEntity<?> createCapsule(@RequestPart Capsules capsule, @RequestPart(value = "files", required = false) List<MultipartFile> files, HttpServletRequest request) {
 	        try {
 	            String email = extractEmailFromToken(request);
-	            Capsules createdCapsule = capsuleService.createCapsule(capsule, email);
+	            Capsules createdCapsule = capsuleService.createCapsule(capsule, files, email);
 	            return ResponseEntity.ok(createdCapsule);
 	        } catch (Exception e) {
 	            return ResponseEntity.badRequest().body("Error creating capsule: " + e.getMessage());

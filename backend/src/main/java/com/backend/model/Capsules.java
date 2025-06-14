@@ -19,11 +19,21 @@ public class Capsules {
 	@Id
 	private String id;
     private String title;
-    private String content;
-    private String ownerId; // userId of the creator
+    private String description;
+    private String personalMessage;
+    private String createdBy;
     private LocalDateTime unlockDate;
-    private boolean isPublic;
     private List<String> recipientEmails; // email addresses of recipients
     private LocalDateTime createdAt;
+    private List<FileInfo> fileInfo;
+    
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class FileInfo{
+    	private String fileName;
+    	private double fileSize;
+    	private String fileId;
+    }
 
 }

@@ -18,7 +18,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
     return diffDays === 1 ? "1 day remaining" : `${diffDays} days remaining`
   }
 
-  const isUnlocked = new Date(capsule.unlockDate) <= new Date()
+  const isUnlocked = new Date(capsule.dateToUnlock) <= new Date()
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="bg-slate-800 border-slate-700 text-white">
@@ -40,8 +40,8 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
           <div className="space-y-3">
             <div className="flex items-center text-sm">
               <User className="mr-2 h-4 w-4 text-indigo-400" />
-              <span className="text-slate-400">{capsule.recipientEmail ? "To:" : "From:"}</span>
-              <span className="ml-1 text-white">{capsule.recipientEmail || capsule.senderEmail}</span>
+              <span className="text-slate-400">{capsule.createdBy ? "From:" : "To:"}</span>
+              <span className="ml-1 text-white">{capsule.createdBy || capsule.senderEmail}</span>
             </div>
 
             <div className="flex items-center text-sm">
@@ -62,7 +62,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <Clock className="mr-2 h-4 w-4 text-indigo-400" />
               <span className="text-slate-400">Unlocks:</span>
               <span className="ml-1 text-white">
-                {new Date(capsule.unlockDate).toLocaleDateString("en-US", {
+                {new Date(capsule.dateToUnlock).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
@@ -74,7 +74,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <FileText className="mr-2 h-4 w-4 text-indigo-400" />
               <span className="text-slate-400">Content:</span>
               <span className="ml-1 text-white">
-                {capsule.mediaCount} {capsule.mediaCount === 1 ? "item" : "items"}
+                {capsule.fileInfo?.length} {capsule.fileInfo?.length === 1 ? "item" : "items"}
               </span>
             </div>
           </div>
@@ -84,7 +84,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
 
         {/* Time Status */}
         <div className="text-center p-4 bg-slate-900/50 rounded-lg">
-          <p className="text-lg font-semibold text-indigo-400">{calculateTimeRemaining(capsule.unlockDate)}</p>
+          <p className="text-lg font-semibold text-indigo-400">{calculateTimeRemaining(capsule.dateToUnlock)}</p>
         </div>
 
         {/* Content Preview */}
@@ -95,10 +95,10 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <h3 className="text-lg font-semibold text-white">Capsule Contents</h3>
 
               {/* Message */}
-              {capsule.message && (
+              {capsule.personalMessage && (
                 <div className="bg-slate-900/50 p-4 rounded-lg">
                   <h4 className="font-medium text-indigo-400 mb-2">Personal Message</h4>
-                  <p className="text-slate-300">{capsule.message}</p>
+                  <p className="text-slate-300">{capsule.personalMessage}</p>
                 </div>
               )}
 
@@ -106,7 +106,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <div className="space-y-2">
                 <h4 className="font-medium text-indigo-400">Files</h4>
                 <div className="space-y-2">
-                  {Array.from({ length: capsule.mediaCount }, (_, i) => (
+                  {Array.from({ length: capsule.fileInfo?.length }, (_, i) => (
                     <div key={i} className="flex items-center bg-slate-900/50 rounded-md p-2">
                       <FileImage className="h-8 w-8 text-indigo-400 mr-3" />
                       <div>
@@ -126,7 +126,7 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
             <Clock className="h-12 w-12 text-slate-400 mx-auto mb-3" />
             <p className="text-slate-400">
               This capsule is still locked. Come back on{" "}
-              {new Date(capsule.unlockDate).toLocaleDateString("en-US", {
+              {new Date(capsule.dateToUnlock).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

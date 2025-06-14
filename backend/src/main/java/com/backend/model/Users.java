@@ -19,6 +19,7 @@ public class Users {
 	private String id;
     private String name;
     private String email;
-    private String password; // store hashed password
-    private List<String> capsuleIds; // Capsules created by this user
+    private String password;
+    private List<String> createdCapsuleIds;
+    private List<String> receivedCapsuleIds;
 }

@@ -75,6 +75,7 @@ const Calendar = React.forwardRef(({ className, selected, onSelect, disabled, ..
 
       days.push(
         <button
+        type="button"
           key={day}
           onClick={() => selectDate(day)}
           disabled={isDisabledDay}
@@ -98,13 +99,13 @@ const Calendar = React.forwardRef(({ className, selected, onSelect, disabled, ..
   return (
     <div ref={ref} className={cn("p-3 bg-slate-800 text-white", className)} {...props}>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="icon" onClick={previousMonth} className="h-8 w-8 text-white hover:bg-slate-700">
+        <Button type="button" variant="ghost" size="icon" onClick={previousMonth} className="h-8 w-8 text-white hover:bg-slate-700">
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <h2 className="text-sm font-semibold text-white">
           {monthNames[month]} {year}
         </h2>
-        <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8 text-white hover:bg-slate-700">
+        <Button type="button" variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8 text-white hover:bg-slate-700">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
