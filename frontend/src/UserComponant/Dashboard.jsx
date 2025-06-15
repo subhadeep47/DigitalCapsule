@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"
 import { Plus, Search } from "lucide-react"
 import { Button } from "../Componants/UiElements/button"
@@ -17,10 +18,11 @@ import api from "../Utils/api"
 
 const Dashboard = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate();
   const { myCapsules, receivedCapsules, selectedCapsule, isModalOpen, searchQuery, activeTab, error } = useSelector(
     (state) => state.capsules,
   )
-  const { isLoggedIn } = useSelector((state) => state.auth)
+  const { isLoggedIn } = useSelector((state) => state.auth) || localStorage.getItem("isLoggedIn")
 
   // Local loading states
   const [isLoadingMyCapsules, setIsLoadingMyCapsules] = useState(false)
@@ -29,11 +31,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
+      dispatchAction(dispatch, ACTION_TYPES.LOGIN)
       fetchCapsules()
     } else {
-      window.location.href = "/"
+      navigate('/')
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn, dispatch])
 
   const fetchCapsules = async () => {
     try {
@@ -70,7 +73,7 @@ const Dashboard = () => {
   )
 
   const navigateToCreateCapsule = () => {
-    window.location.href = "/create-capsule"
+    navigate("/create")
   }
 
   const handleViewDetails = (capsule) => {
@@ -79,15 +82,20 @@ const Dashboard = () => {
   }
 
   const handleDeleteCapsule = async (capsuleId) => {
+    if (!window.confirm("Are you sure you want to delete this capsule? This action cannot be undone.")) {
+      return
+    }
     try {
       setIsDeleting(true)
       await api.delete(`/api/capsules/${capsuleId}`)
       dispatchAction(dispatch, ACTION_TYPES.REMOVE_CAPSULE, capsuleId)
       setIsDeleting(false)
+      alert("Capsule deleted successfully!")
     } catch (error) {
       console.error("Error deleting capsule:", error)
       dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error.message)
       setIsDeleting(false)
+      alert("Failed to delete capsule. Please try again.")
     }
   }
 
@@ -154,6 +162,7 @@ const Dashboard = () => {
                 onViewDetails={handleViewDetails}
                 onDelete={handleDeleteCapsule}
                 isDeleting={isDeleting}
+                canDelete={true}
               />
             ) : (
               <EmptyState type="created" onCreateCapsule={navigateToCreateCapsule} />
@@ -172,6 +181,7 @@ const Dashboard = () => {
                 onViewDetails={handleViewDetails}
                 onDelete={handleDeleteCapsule}
                 isDeleting={isDeleting}
+                canDelete={false}
               />
             ) : (
               <EmptyState type="received" />
@@ -184,6 +194,7 @@ const Dashboard = () => {
           <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
             <p>Error: {error}</p>
             <button
+              type="button"
               onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
               className="mt-2 text-sm underline hover:no-underline"
             >

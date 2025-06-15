@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "../Componants/UiElements/button"
 import BasicDetailsForm from "./createCapsule/BasicDetailsForm"
@@ -9,10 +9,12 @@ import CapsuleSummary from "./createCapsule/CapsuleSummary"
 import { useDispatch, useSelector } from "react-redux"
 import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
 import api from "../Utils/api"
+import { useNavigate } from "react-router-dom"
 
 const CreateCapsule = () => {
   const dispatch = useDispatch()
-  const { isLoggedIn } = useSelector((state) => state.auth)
+  const navigate = useNavigate()
+  const { isLoggedIn } = useSelector((state) => state.auth) || localStorage.getItem("isLoggedIn")
   const { error } = useSelector((state) => state.capsules)
 
   const [capsuleData, setCapsuleData] = useState({
@@ -29,6 +31,12 @@ const CreateCapsule = () => {
   const [activeTab, setActiveTab] = useState("content")
 
   const isValid = capsuleData.title && capsuleData.description && capsuleData.recipientEmails && capsuleData.dateToUnlock
+
+  useEffect(() => {
+      if (!isLoggedIn) {
+      navigate('/')
+    }
+  }, [ isLoggedIn, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -73,7 +81,8 @@ const CreateCapsule = () => {
       setUploading(false)
 
       // Navigate to dashboard
-      window.location.href = "/dashboard"
+      alert("Time capsule created successfully!")
+      navigate("/dashboard")
     } catch (error) {
       console.error("Error creating capsule:", error)
       dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error.message)
@@ -83,12 +92,7 @@ const CreateCapsule = () => {
   }
 
   const navigateBack = () => {
-    window.location.href = "/dashboard"
-  }
-
-  if (!isLoggedIn) {
-    window.location.href = "/"
-    return null
+    navigate("/dashboard")
   }
 
   return (

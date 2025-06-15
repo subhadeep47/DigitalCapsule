@@ -8,7 +8,7 @@ import { Progress } from "../Componants/UiElements/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../Componants/UiElements/dropDown-menu"
 import { useState } from "react"
 
-const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) => {
+const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting, canDelete = true }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const calculateTimeRemaining = (unlockDate) => {
@@ -70,14 +70,16 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
                   <FileText className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-400 hover:bg-red-900/30 focus:bg-red-900/30 cursor-pointer"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  <Trash className="mr-2 h-4 w-4" />
-                  {isDeleting ? "Deleting..." : "Delete Capsule"}
-                </DropdownMenuItem>
+                {canDelete && (
+                  <DropdownMenuItem
+                    className="text-red-400 hover:bg-red-900/30 focus:bg-red-900/30 cursor-pointer"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    {isDeleting ? "Deleting..." : "Delete Capsule"}
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -92,7 +94,11 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting }) =>
         <CardContent className="flex-1">
           <div className="flex items-center text-sm text-slate-400 mb-3">
             <User className="mr-1 h-4 w-4" />
-            <span>{capsule.recipientEmail ? `To: ${capsule.recipientEmail}` : `From: ${capsule.createdBy}`}</span>
+            <span>{`From: ${capsule.createdBy}`}</span>
+          </div>
+          <div className="flex items-center text-sm text-slate-400 mb-3">
+            <User className="mr-1 h-4 w-4" />
+            <span>{`To: ${capsule.recipientEmails}`}</span>
           </div>
           <div className="flex items-center text-sm text-slate-400 mb-4">
             <Clock className="mr-1 h-4 w-4" />
