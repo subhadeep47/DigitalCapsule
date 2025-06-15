@@ -73,17 +73,6 @@ public class CapsuleController {
 	        }
 	    }
 
-	    @PutMapping("/{id}")
-	    public ResponseEntity<?> updateCapsule(@PathVariable Long id, @RequestBody Capsules capsule, HttpServletRequest request) {
-	        try {
-	            String email = extractEmailFromToken(request);
-	            Capsules updatedCapsule = capsuleService.updateCapsule(id.toString(), capsule);
-	            return ResponseEntity.ok(updatedCapsule);
-	        } catch (Exception e) {
-	            return ResponseEntity.badRequest().body("Error updating capsule: " + e.getMessage());
-	        }
-	    }
-
 	    @DeleteMapping("/{id}")
 	    public ResponseEntity<?> deleteCapsule(@PathVariable Long id, HttpServletRequest request) {
 	        try {

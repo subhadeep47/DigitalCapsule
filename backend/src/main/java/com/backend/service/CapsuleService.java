@@ -108,18 +108,5 @@ public class CapsuleService {
     public void deleteCapsule(String capsuleId, String email) {
         capsuleRepository.deleteById(capsuleId);
     }
-
-    public Capsules updateCapsule(String capsuleId, Capsules updatedCapsule) {
-    	 Optional<Capsules> existingOpt = capsuleRepository.findById(capsuleId);
-    	    if (existingOpt.isPresent()) {
-    	        Capsules existing = existingOpt.get();
-    	        existing.setTitle(updatedCapsule.getTitle());
-    	        existing.setUnlockDate(updatedCapsule.getUnlockDate());
-    	        existing.setRecipientEmails(updatedCapsule.getRecipientEmails());
-    	        return capsuleRepository.save(existing);
-    	    } else {
-    	        throw new RuntimeException("Capsule not found with id: " + capsuleId);
-    	    }
-    }
     
 }
