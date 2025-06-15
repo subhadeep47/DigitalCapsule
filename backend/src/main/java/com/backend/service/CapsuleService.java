@@ -15,7 +15,10 @@ import com.backend.model.Users;
 import com.backend.repositories.CapsuleRepository;
 import com.backend.repositories.UserRepository;
 
+import lombok.Data;
+
 @Service
+@Data
 public class CapsuleService {
 	
 	@Autowired

@@ -1,14 +1,18 @@
 package com.backend.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.model.Capsules;
+import com.mongodb.client.gridfs.model.GridFSFile;
 
 @Service
 public class FileService {
@@ -25,4 +29,12 @@ public class FileService {
         
         return fileInfo;
 	}
+	
+	public GridFSFile getFile(String fileId) {
+        return gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(new ObjectId(fileId))));
+    }
+
+    public InputStream getFileStream(GridFSFile file) throws IOException {
+        return gridFsTemplate.getResource(file).getInputStream();
+    }
 }

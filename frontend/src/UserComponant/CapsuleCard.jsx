@@ -124,7 +124,7 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting, canD
         <CardFooter className="border-t border-slate-700 pt-3">
           <div className="flex justify-between items-center w-full text-sm">
             <div className="text-slate-400">
-              {capsule.mediaCount} {capsule.mediaCount === 1 ? "item" : "items"}
+              {Array.isArray(capsule.fileInfo) ? capsule.fileInfo.length : ''} {Array.isArray(capsule.fileInfo) ? (capsule.fileInfo.length ? "item" : "items") : "No media ☹️"}
             </div>
             <div className="text-indigo-400 font-medium">{calculateTimeRemaining(capsule.dateToUnlock)}</div>
           </div>

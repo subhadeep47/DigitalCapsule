@@ -1,7 +1,9 @@
 package com.backend.controller;
 
+import java.io.InputStream;
 import java.util.List;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +11,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.backend.model.Capsules;
 import com.backend.service.CapsuleService;
 import com.backend.utils.JwtUtils;
+import com.mongodb.client.gridfs.model.GridFSFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/capsules")
@@ -70,6 +72,23 @@ public class CapsuleController {
 	            return ResponseEntity.ok(capsules);
 	        } catch (Exception e) {
 	            return ResponseEntity.badRequest().body("Error fetching received capsules: " + e.getMessage());
+	        }
+	    }
+	    
+	    @GetMapping("/download/{fileId}")
+	    public void downloadFile(@PathVariable String fileId, HttpServletResponse response) {
+	        try {
+	            GridFSFile file = capsuleService.getFileService().getFile(fileId);
+	            InputStream stream = capsuleService.getFileService().getFileStream(file);
+	            if (file.getMetadata().get("_contentType") == null) {
+	                throw new NullPointerException("File metadata 'type' is missing");
+	            }
+	            response.setContentType(file.getMetadata().get("_contentType").toString());
+	            response.setHeader("Content-Disposition", "attachment; filename=" + file.getFilename());
+	            IOUtils.copy(stream, response.getOutputStream());
+	            response.flushBuffer();
+	        } catch (Exception e) {
+	            throw new RuntimeException("File not found");
 	        }
 	    }
 

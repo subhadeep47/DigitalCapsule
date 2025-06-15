@@ -25,6 +25,7 @@ public class WebConfig {
         };
     }
 	
+	@Bean
 	public GridFsTemplate gridFsTemplate(MongoDatabaseFactory dbFactory, MappingMongoConverter converter) {
         return new GridFsTemplate(dbFactory, converter, "capsuleFile");
     }

@@ -1,8 +1,10 @@
 "use client"
-import { Calendar, Clock, FileImage, FileText, User } from "lucide-react"
+import { Calendar, Clock, Download, File, FileImage, FileText, User, Video } from "lucide-react"
 import { Modal, ModalHeader, ModalContent } from "../Componants/UiElements/modal"
 import { Badge } from "../Componants/UiElements/badge"
 import { Separator } from "../Componants/UiElements/separator"
+import api from "../Utils/api"
+import { Button } from "../Componants/UiElements/button"
 
 const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
   if (!capsule) return null
@@ -19,6 +21,48 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
   }
 
   const isUnlocked = new Date(capsule.dateToUnlock) <= new Date()
+
+  const getFileIcon = (fileName) => {
+    const extension = fileName.split(".").pop()?.toLowerCase()
+
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
+      return <FileImage className="h-8 w-8 text-indigo-400" />
+    } else if (["mp4", "avi", "mov", "wmv", "flv", "webm"].includes(extension)) {
+      return <Video className="h-8 w-8 text-purple-400" />
+    } else if (["pdf"].includes(extension)) {
+      return <FileText className="h-8 w-8 text-red-400" />
+    } else {
+      return <File className="h-8 w-8 text-gray-400" />
+    }
+  }
+
+  const formatFileSize = (sizeInMB) => {
+    if (sizeInMB < 1) {
+      return `${Math.round(sizeInMB * 1024)} KB`
+    }
+    return `${Math.round(sizeInMB * 100) / 100} MB`
+  }
+
+  const handleDownload = async (fileId, fileName) => {
+    try {
+      const response = await api.get(`/api/capsules/download/${fileId}`, {
+        responseType: "blob",
+      })
+
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", fileName)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Download failed:", error)
+      alert("Failed to download file. Please try again.")
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="bg-slate-800 border-slate-700 text-white">
@@ -40,8 +84,8 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
           <div className="space-y-3">
             <div className="flex items-center text-sm">
               <User className="mr-2 h-4 w-4 text-indigo-400" />
-              <span className="text-slate-400">{capsule.createdBy ? "From:" : "To:"}</span>
-              <span className="ml-1 text-white">{capsule.createdBy || capsule.senderEmail}</span>
+              <span className="text-slate-400">{capsule.recipientEmail ? "To:" : "From:"}</span>
+              <span className="ml-1 text-white">{capsule.recipientEmail || capsule.senderEmail}</span>
             </div>
 
             <div className="flex items-center text-sm">
@@ -74,7 +118,10 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <FileText className="mr-2 h-4 w-4 text-indigo-400" />
               <span className="text-slate-400">Content:</span>
               <span className="ml-1 text-white">
-                {capsule.fileInfo?.length} {capsule.fileInfo?.length === 1 ? "item" : "items"}
+                {Array.isArray(capsule.fileInfo) ? capsule.fileInfo.length : capsule.mediaCount || 0}{" "}
+                {(Array.isArray(capsule.fileInfo) ? capsule.fileInfo.length : capsule.mediaCount || 0) === 1
+                  ? "item"
+                  : "items"}
               </span>
             </div>
           </div>
@@ -95,28 +142,53 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <h3 className="text-lg font-semibold text-white">Capsule Contents</h3>
 
               {/* Message */}
-              {capsule.personalMessage && (
+              {capsule.message && (
                 <div className="bg-slate-900/50 p-4 rounded-lg">
                   <h4 className="font-medium text-indigo-400 mb-2">Personal Message</h4>
-                  <p className="text-slate-300">{capsule.personalMessage}</p>
+                  <p className="text-slate-300">{capsule.message}</p>
                 </div>
               )}
 
               {/* Files */}
-              <div className="space-y-2">
-                <h4 className="font-medium text-indigo-400">Files</h4>
+              {Array.isArray(capsule.fileInfo) && capsule.fileInfo.length > 0 && (
                 <div className="space-y-2">
-                  {Array.from({ length: capsule.fileInfo?.length }, (_, i) => (
-                    <div key={i} className="flex items-center bg-slate-900/50 rounded-md p-2">
-                      <FileImage className="h-8 w-8 text-indigo-400 mr-3" />
-                      <div>
-                        <p className="text-sm font-medium text-white">Memory_{i + 1}.jpg</p>
-                        <p className="text-xs text-slate-400">Image • 2.4 MB</p>
+                  <h4 className="font-medium text-indigo-400">Files</h4>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {capsule.fileInfo.map((file, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between bg-slate-900/50 rounded-md p-3 border border-slate-700"
+                      >
+                        <div className="flex items-center flex-1 min-w-0">
+                          {getFileIcon(file.fileName)}
+                          <div className="ml-3 flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate">{file.fileName}</p>
+                            <p className="text-xs text-slate-400">{formatFileSize(file.fileSize)}</p>
+                          </div>
+                        </div>
+                        <Button
+                          type='button'
+                          onClick={() => handleDownload(file.fileId, file.fileName)}
+                          size="sm"
+                          variant="outline"
+                          className="ml-3 bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white"
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Download
+                        </Button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* No files message */}
+              {(!Array.isArray(capsule.fileInfo) || capsule.fileInfo.length === 0) && (
+                <div className="text-center p-6 bg-slate-900/30 rounded-lg">
+                  <FileText className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+                  <p className="text-slate-400">No files in this capsule</p>
+                </div>
+              )}
             </div>
           </>
         )}
