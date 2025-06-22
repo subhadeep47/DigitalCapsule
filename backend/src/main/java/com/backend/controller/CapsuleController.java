@@ -93,10 +93,10 @@ public class CapsuleController {
 	    }
 
 	    @DeleteMapping("/{id}")
-	    public ResponseEntity<?> deleteCapsule(@PathVariable Long id, HttpServletRequest request) {
+	    public ResponseEntity<?> deleteCapsule(@PathVariable String id, HttpServletRequest request) {
 	        try {
 	            String email = extractEmailFromToken(request);
-	            capsuleService.deleteCapsule(id.toString(), email);
+	            capsuleService.deleteCapsule(id, email);
 	            return ResponseEntity.ok("Capsules deleted successfully");
 	        } catch (Exception e) {
 	            return ResponseEntity.badRequest().body("Error deleting capsule: " + e.getMessage());

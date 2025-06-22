@@ -37,4 +37,8 @@ public class FileService {
     public InputStream getFileStream(GridFSFile file) throws IOException {
         return gridFsTemplate.getResource(file).getInputStream();
     }
+    
+    public void deleteFile(Capsules.FileInfo file) {
+    	gridFsTemplate.delete(Query.query(Criteria.where("_id").is(new ObjectId(file.getFileId()))));
+    }
 }

@@ -84,8 +84,8 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
           <div className="space-y-3">
             <div className="flex items-center text-sm">
               <User className="mr-2 h-4 w-4 text-indigo-400" />
-              <span className="text-slate-400">{capsule.recipientEmail ? "To:" : "From:"}</span>
-              <span className="ml-1 text-white">{capsule.recipientEmail || capsule.senderEmail}</span>
+              <span className="text-slate-400">{capsule.createdBy ? "From:" : "To:"}</span>
+              <span className="ml-1 text-white">{capsule.createdBy || capsule.senderEmail}</span>
             </div>
 
             <div className="flex items-center text-sm">
@@ -142,10 +142,10 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
               <h3 className="text-lg font-semibold text-white">Capsule Contents</h3>
 
               {/* Message */}
-              {capsule.message && (
+              {capsule.personalMessage && (
                 <div className="bg-slate-900/50 p-4 rounded-lg">
                   <h4 className="font-medium text-indigo-400 mb-2">Personal Message</h4>
-                  <p className="text-slate-300">{capsule.message}</p>
+                  <p className="text-slate-300">{capsule.personalMessage}</p>
                 </div>
               )}
 

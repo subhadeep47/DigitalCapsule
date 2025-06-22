@@ -77,14 +77,10 @@ public class CapsuleService {
     public List<Capsules> getCapsulesCreatedBy(String creatorEmail) {
     	
     	Users user = userRepository.findByEmail(creatorEmail).orElseThrow(() -> new RuntimeException("User not found"));
-    	
-    	List<Capsules> createdCapsules;
-    	
-    	if(user.getCreatedCapsuleIds() == null) {
-    		createdCapsules = new ArrayList<Capsules>();
-    	}else {
-    		createdCapsules = capsuleRepository.findAllById(user.getCreatedCapsuleIds());
-    	}
+    	    	
+    	List<Capsules> createdCapsules = Optional.ofNullable(user.getCreatedCapsuleIds())
+    								.map(capsuleRepository::findAllById)
+    								.orElseGet(ArrayList::new);
     	
         return createdCapsules;
     }
@@ -93,13 +89,9 @@ public class CapsuleService {
     	
     	Users user = userRepository.findByEmail(recipientEmail).orElseThrow(() -> new RuntimeException("User not found"));
     	
-    	List<Capsules> receivedCapsules;
-    	
-    	if(user.getReceivedCapsuleIds() == null) {
-    		receivedCapsules = new ArrayList<Capsules>();
-    	}else {
-    		receivedCapsules = capsuleRepository.findAllById(user.getReceivedCapsuleIds());
-    	}
+    	List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
+    		    					.map(capsuleRepository::findAllById)
+    		    					.orElseGet(ArrayList::new);
     	
         return receivedCapsules;
     }
@@ -109,6 +101,37 @@ public class CapsuleService {
     }
 
     public void deleteCapsule(String capsuleId, String email) {
+        Optional<Capsules> optionalCapsule = capsuleRepository.findById(capsuleId);
+        if (!optionalCapsule.isPresent()) {
+            throw new RuntimeException("Capsule not found");
+        }
+
+        Capsules capsule = optionalCapsule.get();
+
+        // Delete file attachments
+        if (capsule.getFileInfo() != null) {
+            for (Capsules.FileInfo file : capsule.getFileInfo()) {
+            	fileService.deleteFile(file);
+            }
+        }
+
+        // Remove capsule ID from creator
+        userRepository.findByEmail(email).ifPresent(user -> {
+        	Optional.ofNullable(user.getCreatedCapsuleIds())
+            		.ifPresent(ids -> ids.remove(capsuleId));
+            userRepository.save(user);
+        });
+
+        // Remove capsule ID from all recipients
+        for (String recipientEmail : capsule.getRecipientEmails()) {
+        	userRepository.findByEmail(recipientEmail).ifPresent(user -> {
+        		Optional.ofNullable(user.getReceivedCapsuleIds())
+                		.ifPresent(ids -> ids.remove(capsuleId));
+                userRepository.save(user);
+            });
+        }
+
+        // Delete the capsule itself
         capsuleRepository.deleteById(capsuleId);
     }
     
