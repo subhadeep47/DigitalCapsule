@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,11 +79,17 @@ public class UserController {
     }
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-    	Cookie cookie = new Cookie("jwt", "");
-        cookie.setMaxAge(0); // Expire immediately
-        cookie.setPath("/"); // Ensure it matches the original path
-        response.addCookie(cookie);
+         ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                 .httpOnly(true)
+                 .secure(true)
+                 .sameSite("None")
+                 .path("/")
+                 .maxAge(0) // Expire immediately
+                 .build();
 
-        return ResponseEntity.ok("Logged out successfully");
-    }
+         response.setHeader("Set-Cookie", cookie.toString());
+
+         return ResponseEntity.ok("Logged out successfully");
+     }
+
 }
