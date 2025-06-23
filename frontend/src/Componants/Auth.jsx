@@ -88,7 +88,7 @@ const Auth = () => {
         localStorage.setItem("authToken", response.data.token)
       }
 
-      localStorage.setItem("isLoggedIn", "true")
+      localStorage.setItem("isLoggedIn", true)
       dispatchAction(dispatch, ACTION_TYPES.LOGIN)
 
       // Show success message
