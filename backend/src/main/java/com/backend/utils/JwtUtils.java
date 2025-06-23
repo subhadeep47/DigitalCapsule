@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
@@ -48,13 +49,15 @@ public class JwtUtils {
     }
     
     public void setJwtCookie(HttpServletResponse response, String jwtToken) {
-        Cookie cookie = new Cookie("jwt", jwtToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);// Set to true in production
-        cookie.setSameSite("None");
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 1 day
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(24 * 60 * 60)
+                .build();
+
+        response.setHeader("Set-Cookie", cookie.toString());
     }
     
     public String extractJwtFromCookies(HttpServletRequest request) {
