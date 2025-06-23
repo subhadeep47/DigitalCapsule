@@ -50,7 +50,8 @@ public class JwtUtils {
     public void setJwtCookie(HttpServletResponse response, String jwtToken) {
         Cookie cookie = new Cookie("jwt", jwtToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Set to true in production
+        cookie.setSecure(true);// Set to true in production
+        cookie.setSameSite("None");
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60); // 1 day
         response.addCookie(cookie);
