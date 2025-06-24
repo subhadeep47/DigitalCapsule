@@ -57,6 +57,7 @@ const Calendar = React.forwardRef(({ className, selected, onSelect, disabled, ..
   const isDisabled = (day) => {
     if (!disabled) return false
     const date = new Date(year, month, day)
+    date.setHours(0, 0, 0, 0)
     return disabled(date)
   }
 

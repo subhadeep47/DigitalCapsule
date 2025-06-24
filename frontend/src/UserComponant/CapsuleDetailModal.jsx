@@ -11,7 +11,11 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
 
   const calculateTimeRemaining = (unlockDate) => {
     const now = new Date()
+    now.setHours(0, 0, 0, 0) // Start of today
+
     const unlock = new Date(unlockDate)
+    unlock.setHours(0, 0, 0, 0) // Start of unlock day
+
     const diffTime = unlock.getTime() - now.getTime()
 
     if (diffTime <= 0) return "Unlocked"
@@ -20,7 +24,17 @@ const CapsuleDetailModal = ({ capsule, isOpen, onClose }) => {
     return diffDays === 1 ? "1 day remaining" : `${diffDays} days remaining`
   }
 
-  const isUnlocked = new Date(capsule.dateToUnlock) <= new Date()
+  const checkIfUnlocked = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const unlockDate = new Date(capsule.dateToUnlock)
+    unlockDate.setHours(0, 0, 0, 0)
+
+    return unlockDate <= today
+  }
+
+  const isUnlocked = checkIfUnlocked()
 
   const getFileIcon = (fileName) => {
     const extension = fileName.split(".").pop()?.toLowerCase()

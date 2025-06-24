@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../Componants/UiEle
 const StatsCards = ({ myCapsules, receivedCapsules }) => {
   const calculateTimeRemaining = (unlockDate) => {
     const now = new Date()
+    now.setHours(0, 0, 0, 0) // Start of today
+
     const unlock = new Date(unlockDate)
+    unlock.setHours(0, 0, 0, 0) // Start of unlock day
+
     const diffTime = unlock.getTime() - now.getTime()
 
     if (diffTime <= 0) return "Unlocked"
@@ -13,9 +17,25 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
     return diffDays === 1 ? "1 day remaining" : `${diffDays} days remaining`
   }
 
-  const lockedCapsulesCount =
-    myCapsules.filter((c) => new Date(c.dateToUnlock) > new Date()).length +
-    receivedCapsules.filter((c) => new Date(c.dateToUnlock) > new Date()).length
+  const isCapsulelocked = (capsule) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const unlockDate = new Date(capsule.dateToUnlock)
+    unlockDate.setHours(0, 0, 0, 0)
+    return unlockDate > today
+  }
+
+  const totalCapsules = myCapsules.length + receivedCapsules.length
+
+  const lockedCapsules = [...myCapsules, ...receivedCapsules].filter(isCapsulelocked).length
+
+  const getNextUnlockCapsule = () => {
+    return [...myCapsules, ...receivedCapsules]
+      .filter(isCapsulelocked)
+      .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())[0]
+  }
+
+  const nextUnlockCapsule = getNextUnlockCapsule()
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -27,7 +47,7 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{myCapsules.length + receivedCapsules.length}</div>
+          <div className="text-3xl font-bold">{totalCapsules}</div>
           <p className="text-slate-400 text-sm">
             {myCapsules.length} created · {receivedCapsules.length} received
           </p>
@@ -42,7 +62,7 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{lockedCapsulesCount}</div>
+          <div className="text-3xl font-bold">{lockedCapsules}</div>
           <p className="text-slate-400 text-sm">Waiting to be unlocked</p>
         </CardContent>
       </Card>
@@ -55,36 +75,20 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {myCapsules.length > 0 || receivedCapsules.length > 0 ? (
+          {nextUnlockCapsule ? (
             <>
               <div className="text-3xl font-bold">
-                {(() => {
-                  const allCapsules = [...myCapsules, ...receivedCapsules]
-                    .filter((c) => new Date(c.dateToUnlock) > new Date())
-                    .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())
-
-                  if (allCapsules.length === 0) return "None"
-
-                  const nextUnlock = new Date(allCapsules[0].dateToUnlock)
-                  return nextUnlock.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                })()}
+                {new Date(nextUnlockCapsule.dateToUnlock).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
               </div>
-              <p className="text-slate-400 text-sm">
-                {(() => {
-                  const allCapsules = [...myCapsules, ...receivedCapsules]
-                    .filter((c) => new Date(c.dateToUnlock) > new Date())
-                    .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())
-
-                  if (allCapsules.length === 0) return "No upcoming unlocks"
-
-                  return calculateTimeRemaining(allCapsules[0].dateToUnlock)
-                })()}
-              </p>
+              <p className="text-slate-400 text-sm">{calculateTimeRemaining(nextUnlockCapsule.dateToUnlock)}</p>
             </>
           ) : (
             <>
               <div className="text-3xl font-bold">-</div>
-              <p className="text-slate-400 text-sm">No capsules yet</p>
+              <p className="text-slate-400 text-sm">No upcoming unlocks</p>
             </>
           )}
         </CardContent>
