@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.backend.model.Users;
@@ -14,6 +15,9 @@ import com.backend.repositories.UserRepository;
 public class UserService {
 
     private final UserRepository userRepository;
+    
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -25,13 +29,14 @@ public class UserService {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("User already exists with email: " + user.getEmail());
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     // ✅ Authenticate a user (login)
     public Users authenticateUser(String email, String password) {
         Optional<Users> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(password)) {
+        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
             throw new RuntimeException("Invalid email or password.");
         }
         return userOpt.get();

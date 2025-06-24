@@ -3,6 +3,7 @@ package com.backend.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import com.backend.model.Capsules;
 import com.backend.model.Users;
 import com.backend.repositories.CapsuleRepository;
 import com.backend.repositories.UserRepository;
+import com.backend.utils.EncryptionUtils;
 
 import lombok.Data;
 
@@ -28,6 +30,9 @@ public class CapsuleService {
 	private UserRepository userRepository;
 	
 	@Autowired
+	private EncryptionUtils encryptionUtils;
+	
+	@Autowired
 	private FileService fileService;
 
     public Capsules createCapsule(Capsules capsule, List<MultipartFile> files, String email) throws IOException {
@@ -40,6 +45,13 @@ public class CapsuleService {
             capsule.setFileInfo(fileMetas);
     	}
     	
+    	if(capsule.getPersonalMessage() != null) {
+    		try {
+                capsule.setPersonalMessage(encryptionUtils.encrypt(capsule.getPersonalMessage()));
+            } catch (Exception e) {
+                capsule.setPersonalMessage(null); // fallback to hide on error
+            }
+    	}
         capsule.setCreatedBy(email);
         capsule.setCreatedAt(LocalDateTime.now());
 
@@ -82,6 +94,10 @@ public class CapsuleService {
     								.map(capsuleRepository::findAllById)
     								.orElseGet(ArrayList::new);
     	
+    	for(Capsules capsule:createdCapsules) {
+    		decryptIfUnlocked(capsule);
+    	}
+    	
         return createdCapsules;
     }
 
@@ -92,6 +108,10 @@ public class CapsuleService {
     	List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
     		    					.map(capsuleRepository::findAllById)
     		    					.orElseGet(ArrayList::new);
+    	
+    	for(Capsules capsule:receivedCapsules) {
+    		decryptIfUnlocked(capsule);
+    	}
     	
         return receivedCapsules;
     }
@@ -133,6 +153,22 @@ public class CapsuleService {
 
         // Delete the capsule itself
         capsuleRepository.deleteById(capsuleId);
+    }
+    
+    private void decryptIfUnlocked(Capsules capsule) {
+        if (capsule.getPersonalMessage() != null && isUnlocked(capsule.getDateToUnlock())) {
+            try {
+                capsule.setPersonalMessage(encryptionUtils.decrypt(capsule.getPersonalMessage()));
+            } catch (Exception e) {
+                capsule.setPersonalMessage(null); // fallback to hide on error
+            }
+        } else {
+            capsule.setPersonalMessage(null); // hide message if locked
+        }
+    }
+
+    private boolean isUnlocked(LocalDateTime dateToUnlock) {
+        return !LocalDateTime.now().isBefore(dateToUnlock);
     }
     
 }
