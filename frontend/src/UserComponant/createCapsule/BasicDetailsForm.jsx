@@ -11,8 +11,6 @@ import { Calendar as CalendarComponent } from "../../Componants/UiElements/calen
 import { format, cn } from "../../Utils/utils"
 
 const BasicDetailsForm = ({ capsuleData, setCapsuleData }) => {
-  const minDate = new Date()
-  minDate.setDate(minDate.getDate() + 1)
 
   const handleInputChange = (field, value) => {
     setCapsuleData((prev) => ({
@@ -22,7 +20,27 @@ const BasicDetailsForm = ({ capsuleData, setCapsuleData }) => {
   }
 
   const handleDateSelect = (date) => {
-    handleInputChange("dateToUnlock", date ? date.toISOString() : "")
+    if (date) {
+      const unlockDate = new Date(date)
+      unlockDate.setHours(0, 0, 0, 0)
+
+      const year = unlockDate.getFullYear()
+      const month = String(unlockDate.getMonth() + 1).padStart(2, "0")
+      const day = String(unlockDate.getDate()).padStart(2, "0")
+      const dateString = `${year}-${month}-${day}T00:00:00`
+
+      handleInputChange("dateToUnlock", dateString)
+    } else {
+      handleInputChange("dateToUnlock", "")
+    }
+  }
+
+  const isDateDisabled = (date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const checkDate = new Date(date)
+    checkDate.setHours(0, 0, 0, 0)
+    return checkDate <= today
   }
 
   const selectedDate = capsuleData.dateToUnlock ? new Date(capsuleData.dateToUnlock) : undefined
@@ -95,7 +113,7 @@ const BasicDetailsForm = ({ capsuleData, setCapsuleData }) => {
                     mode="single"
                     selected={selectedDate}
                     onSelect={handleDateSelect}
-                    disabled={(date) => date < minDate}
+                    disabled={isDateDisabled}
                     initialFocus
                     className="bg-slate-800 text-white"
                   />

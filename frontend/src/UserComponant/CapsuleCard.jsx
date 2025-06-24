@@ -13,7 +13,11 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting, canD
 
   const calculateTimeRemaining = (unlockDate) => {
     const now = new Date()
+    now.setHours(0, 0, 0, 0) // Start of today
+
     const unlock = new Date(unlockDate)
+    unlock.setHours(0, 0, 0, 0) // Start of unlock day
+
     const diffTime = unlock.getTime() - now.getTime()
 
     if (diffTime <= 0) return "Unlocked"
@@ -25,16 +29,32 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting, canD
   const calculateProgress = (createdAt, unlockDate) => {
     const now = new Date()
     const created = new Date(createdAt)
+
     const unlock = new Date(unlockDate)
+    unlock.setHours(0, 0, 0, 0)
 
     const totalTime = unlock.getTime() - created.getTime()
     const elapsedTime = now.getTime() - created.getTime()
 
     if (elapsedTime >= totalTime) return 100
-    return Math.round((elapsedTime / totalTime) * 100)
+    if (totalTime <= 0) return 100
+
+    const progress = Math.round((elapsedTime / totalTime) * 100)
+    return Math.max(0, Math.min(100, progress))
   }
 
-  const isUnlocked = new Date(capsule.dateToUnlock) <= new Date()
+  const isUnlocked = (() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const unlockDate = new Date(capsule.dateToUnlock)
+    unlockDate.setHours(0, 0, 0, 0)
+
+    return unlockDate <= today
+  })()
+
+  // Get file count from fileInfo array or fallback to mediaCount
+  const fileCount = Array.isArray(capsule.fileInfo) ? capsule.fileInfo.length : 0
 
   const handleViewDetails = () => {
     onViewDetails(capsule)
@@ -124,7 +144,7 @@ const CapsuleCard = ({ capsule, index, onViewDetails, onDelete, isDeleting, canD
         <CardFooter className="border-t border-slate-700 pt-3">
           <div className="flex justify-between items-center w-full text-sm">
             <div className="text-slate-400">
-              {Array.isArray(capsule.fileInfo) ? capsule.fileInfo.length : ''} {Array.isArray(capsule.fileInfo) ? (capsule.fileInfo.length ? "item" : "items") : "No media ☹️"}
+              {fileCount} {fileCount === 1 ? "item" : "items"}
             </div>
             <div className="text-indigo-400 font-medium">{calculateTimeRemaining(capsule.dateToUnlock)}</div>
           </div>
