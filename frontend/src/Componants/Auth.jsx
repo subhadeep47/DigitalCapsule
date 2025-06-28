@@ -83,19 +83,20 @@ const Auth = () => {
       const endpoint = isRegister ? "/auth/register" : "/auth/login"
       const response = await api.post(endpoint, userDetails)
 
-      // Store auth token if provided
-      if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token)
+      if(isRegister){
+        alert("Account created successfully!")
+        navigate('/')
       }
-
-      localStorage.setItem("isLoggedIn", true)
-      dispatchAction(dispatch, ACTION_TYPES.LOGIN)
-
-      // Show success message
-      const message = isRegister ? "Account created successfully!" : "Welcome back!"
-      alert(message)
-
-      navigate("/dashboard")
+      else{
+        // Store auth token if provided
+        if (response.data.token) {
+          localStorage.setItem("authToken", response.data.token)
+        }
+        localStorage.setItem("isLoggedIn", true)
+        dispatchAction(dispatch, ACTION_TYPES.LOGIN)
+        alert("Welcome back!")
+        navigate("/dashboard")
+      }
     } catch (err) {
       console.error("Auth error:", err)
       const errorMessage =

@@ -27,7 +27,7 @@ const BasicDetailsForm = ({ capsuleData, setCapsuleData }) => {
       const year = unlockDate.getFullYear()
       const month = String(unlockDate.getMonth() + 1).padStart(2, "0")
       const day = String(unlockDate.getDate()).padStart(2, "0")
-      const dateString = `${year}-${month}-${day}T00:00:00`
+      const dateString = `${year}-${month}-${day}`
 
       handleInputChange("dateToUnlock", dateString)
     } else {

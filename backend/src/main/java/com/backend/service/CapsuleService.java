@@ -1,6 +1,7 @@
 package com.backend.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,8 +167,9 @@ public class CapsuleService {
         }
     }
 
-    private boolean isUnlocked(LocalDateTime dateToUnlock) {
-        return !LocalDateTime.now().isBefore(dateToUnlock);
+    private boolean isUnlocked(LocalDate dateToUnlock) {
+    	LocalDate today = LocalDate.now();
+        return !dateToUnlock.isAfter(today);
     }
     
 }

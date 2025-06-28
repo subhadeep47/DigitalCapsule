@@ -60,7 +60,7 @@ public class CapsuleController {
 	            List<Capsules> capsules = capsuleService.getCapsulesCreatedBy(email);
 	            return ResponseEntity.ok(capsules);
 	        } catch (Exception e) {
-	            return ResponseEntity.badRequest().body("Error fetching created capsules: " + e.getMessage());
+	            return ResponseEntity.status(401).body("Error fetching created capsules: " + e.getMessage());
 	        }
 	    }
 
@@ -71,7 +71,7 @@ public class CapsuleController {
 	            List<Capsules> capsules = capsuleService.getCapsulesReceivedBy(email);
 	            return ResponseEntity.ok(capsules);
 	        } catch (Exception e) {
-	            return ResponseEntity.badRequest().body("Error fetching received capsules: " + e.getMessage());
+	            return ResponseEntity.status(401).body("Error fetching received capsules: " + e.getMessage());
 	        }
 	    }
 	    

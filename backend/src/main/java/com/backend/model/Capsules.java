@@ -1,5 +1,6 @@
 package com.backend.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Capsules {
     private String description;
     private String personalMessage;
     private String createdBy;
-    private LocalDateTime dateToUnlock;
+    private LocalDate dateToUnlock;
     private List<String> recipientEmails; // email addresses of recipients
     private LocalDateTime createdAt;
     private List<FileInfo> fileInfo;
