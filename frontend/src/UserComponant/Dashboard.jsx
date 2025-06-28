@@ -53,7 +53,7 @@ const Dashboard = () => {
       setIsLoadingReceivedCapsules(false)
     } catch (error) {
       console.error("Error fetching capsules:", error)
-      dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error.message)
+      dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error?.response?.data + '. Please try to perform logout and login. Also make sure third party cookie is allowed 🙂')
       setIsLoadingMyCapsules(false)
       setIsLoadingReceivedCapsules(false)
     }
@@ -140,6 +140,20 @@ const Dashboard = () => {
           </div>
         </header>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
+            <p>Error: {error}</p>
+            <button
+              type="button"
+              onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <StatsCard myCapsules={myCapsules} receivedCapsules={receivedCapsules} />
 
@@ -188,20 +202,6 @@ const Dashboard = () => {
             )}
           </TabsContent>
         </Tabs>
-
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
-            <p>Error: {error}</p>
-            <button
-              type="button"
-              onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
-              className="mt-2 text-sm underline hover:no-underline"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
 
         {/* Capsule Detail Modal */}
         <CapsuleDetailModal capsule={selectedCapsule} isOpen={isModalOpen} onClose={handleCloseModal} />
