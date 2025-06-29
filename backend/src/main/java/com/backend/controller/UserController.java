@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.backend.model.SearchUser;
 import com.backend.model.Users;
 import com.backend.service.UserService;
 import com.backend.utils.JwtUtils;
@@ -61,18 +62,23 @@ public class UserController {
                 return ResponseEntity.status(401).body("Missing or invalid Authorization header");
             }
             String email = jwtUtil.extractEmail(token);
-            Optional<Users> user = usersService.getUserByEmail(email);
-            return ResponseEntity.ok(user);
+            SearchUser searchUser = usersService.getCurrentUser(email);
+            return ResponseEntity.ok(searchUser);
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid token: " + e.getMessage());
         }
     }
     
     @GetMapping("/search")
-    public ResponseEntity<?> searchUsers(@RequestParam("query") String query) {
+    public ResponseEntity<?> searchUsers(@RequestParam("query") String query, HttpServletRequest request) {
         try {
-            List<Users> users = usersService.searchUsers(query);
-            return ResponseEntity.ok(users);
+        	String token = jwtUtil.extractJwtFromCookies(request);
+            if (token == null) {
+                return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+            }
+            String email = jwtUtil.extractEmail(token);
+            List<SearchUser> searchUsers = usersService.searchUsers(query, email);
+            return ResponseEntity.ok(searchUsers);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Search failed: " + e.getMessage());
         }

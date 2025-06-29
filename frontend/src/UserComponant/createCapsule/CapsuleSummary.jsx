@@ -25,7 +25,7 @@ const CapsuleSummary = ({ capsuleData, files, uploading, progress, isValid }) =>
 
           <div>
             <p className="text-sm text-slate-400">Recipients</p>
-            <p className="font-medium">{capsuleData.recipientList || "No recipients selected"}</p>
+            <p className="font-medium">{capsuleData.recipientEmails || "No recipients selected"}</p>
           </div>
 
           <div>

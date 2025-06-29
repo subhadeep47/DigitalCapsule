@@ -1,4 +1,4 @@
-import { login, logout } from "./authSlicer"
+import { currentUser, login, logout } from "./authSlicer"
 import {
   setMyCapsules,
   setReceivedCapsules,
@@ -16,6 +16,7 @@ export const ACTION_TYPES = {
   // Auth actions
   LOGIN: "LOGIN",
   LOGOUT: "LOGOUT",
+  CURRENT_USER: "CURRENT_USER",
 
   // Data actions
   SET_MY_CAPSULES: "SET_MY_CAPSULES",
@@ -42,6 +43,9 @@ export const dispatchAction = (dispatch, type, payload) => {
       break
     case ACTION_TYPES.LOGOUT:
       dispatch(logout())
+      break
+    case ACTION_TYPES.CURRENT_USER:
+      dispatch(currentUser(payload))
       break
 
     // Data actions

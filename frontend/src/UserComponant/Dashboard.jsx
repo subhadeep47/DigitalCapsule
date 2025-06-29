@@ -22,7 +22,7 @@ const Dashboard = () => {
   const { myCapsules, receivedCapsules, selectedCapsule, isModalOpen, searchQuery, activeTab, error } = useSelector(
     (state) => state.capsules,
   )
-  const { isLoggedIn } = useSelector((state) => state.auth) || localStorage.getItem("isLoggedIn")
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn) || localStorage.getItem("isLoggedIn")
 
   // Local loading states
   const [isLoadingMyCapsules, setIsLoadingMyCapsules] = useState(false)
@@ -32,11 +32,25 @@ const Dashboard = () => {
   useEffect(() => {
     if (isLoggedIn) {
       dispatchAction(dispatch, ACTION_TYPES.LOGIN)
+      fetchCurrentUser()
       fetchCapsules()
     } else {
       navigate('/')
     }
   }, [isLoggedIn, dispatch])
+
+  const fetchCurrentUser = async () => {
+    try{
+      //setting the current user
+      setIsLoadingMyCapsules(true)
+      const currentUser = await api.get("/auth/me")
+      dispatchAction(dispatch, ACTION_TYPES.CURRENT_USER, currentUser.data)
+      setIsLoadingMyCapsules(false)
+    } catch (error) {
+      dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, error?.response?.data + '. Please try to perform logout and login. Also make sure third party cookie is allowed 🙂')
+      setIsLoadingMyCapsules(false)
+    }
+  }
 
   const fetchCapsules = async () => {
     try {
