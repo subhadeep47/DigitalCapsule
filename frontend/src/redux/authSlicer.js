@@ -16,8 +16,11 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       localStorage.removeItem('isLoggedIn');
     },
+    currentUser(state, action){
+      state.user = action.payload;
+    }
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, currentUser } = authSlice.actions;
 export default authSlice;
