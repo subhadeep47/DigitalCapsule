@@ -164,6 +164,7 @@ public class CapsuleService {
             }
         } else {
             capsule.setPersonalMessage(null); // hide message if locked
+            capsule.setFileInfo(null);      
         }
     }
 

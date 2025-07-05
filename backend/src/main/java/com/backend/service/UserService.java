@@ -26,7 +26,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // ✅ Register a new user
     public Users registerUser(Users user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("User already exists with email: " + user.getEmail());
@@ -35,7 +34,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // ✅ Authenticate a user (login)
     public Users authenticateUser(String email, String password) {
         Optional<Users> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
@@ -44,18 +42,15 @@ public class UserService {
         return userOpt.get();
     }
 
-    // ✅ Get user by ID
     public Users getUserById(String id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    // ✅ Get user by Email
     public Optional<Users> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    // ✅ Delete a user
     public void deleteUserById(String id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Cannot delete: User not found.");
