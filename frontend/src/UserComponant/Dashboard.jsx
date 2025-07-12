@@ -14,6 +14,7 @@ import CapsuleDetailModal from "./CapsuleDetailModal"
 import { useDispatch, useSelector } from "react-redux"
 import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
 import api from "../Utils/api"
+import UserProfileHeader from "./dashboard/UserProfileHeader";
 
 
 const Dashboard = () => {
@@ -137,22 +138,30 @@ const Dashboard = () => {
             <p className="text-slate-300 mt-1">Preserve moments, unlock memories</p>
           </motion.div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
+          {/* user profile */}
+          <UserProfileHeader />
+        </header>
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-80">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
               <Input
                 type="search"
-                placeholder="Search capsules..."
+                placeholder="Search your time capsules..."
                 className="pl-8 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 w-full"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
             </div>
-            <Button onClick={navigateToCreateCapsule} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Plus className="mr-2 h-4 w-4" /> New Capsule
-            </Button>
           </div>
-        </header>
+          <Button
+            onClick={navigateToCreateCapsule}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Create New Capsule
+          </Button>
+        </div>
 
         {/* Error Display */}
         {error && (
