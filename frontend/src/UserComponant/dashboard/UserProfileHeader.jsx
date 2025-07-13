@@ -57,13 +57,13 @@ const UserProfileHeader = () => {
       </Button>
 
       {isExpanded && (
-        <div className="absolute left-0 sm:right-0 top-full mt-2 bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-xl z-50 w-[280px] sm:w-[300px]">
+        <div className="absolute top-full mt-2 bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-xl z-50 w-[280px] right-0 sm:right-0">
           <div className="flex items-center space-x-3 mb-4">
             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg">
               {avatar}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-medium text-base">{displayName}</p>
+              <p className="text-white font-medium text-base truncate">{displayName}</p>
               <p className="text-slate-400 text-sm truncate">{user?.email}</p>
             </div>
           </div>
