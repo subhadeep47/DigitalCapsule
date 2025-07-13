@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,35 +91,47 @@ public class CapsuleService {
         return saved;
     }
 
-    public List<Capsules> getCapsulesCreatedBy(String creatorEmail) {
-    	
-    	Users user = userRepository.findByEmail(creatorEmail).orElseThrow(() -> new RuntimeException("User not found"));
-    	    	
-    	List<Capsules> createdCapsules = Optional.ofNullable(user.getCreatedCapsuleIds())
-    								.map(capsuleRepository::findAllById)
-    								.orElseGet(ArrayList::new);
-    	
-    	for(Capsules capsule:createdCapsules) {
-    		decryptIfUnlocked(capsule);
-    	}
-    	
-        return createdCapsules;
+    public Page<Capsules> getCapsulesCreatedBy(String creatorEmail, int page, int limit) {
+        Users user = userRepository.findByEmail(creatorEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<String> createdCapsuleIds = Optional.ofNullable(user.getCreatedCapsuleIds())
+                                                 .orElse(Collections.emptyList());
+
+        if (createdCapsuleIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("dateToUnlock").descending());
+
+        Page<Capsules> pageResult = capsuleRepository.findByIdIn(createdCapsuleIds, pageable);
+
+        pageResult.getContent().forEach(this::decryptIfUnlocked);
+
+        return pageResult;
     }
 
-    public List<Capsules> getCapsulesReceivedBy(String recipientEmail) {
-    	
-    	Users user = userRepository.findByEmail(recipientEmail).orElseThrow(() -> new RuntimeException("User not found"));
-    	
-    	List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
-    		    					.map(capsuleRepository::findAllById)
-    		    					.orElseGet(ArrayList::new);
-    	
-    	for(Capsules capsule:receivedCapsules) {
-    		decryptIfUnlocked(capsule);
-    	}
-    	
-        return receivedCapsules;
+
+    public Page<Capsules> getCapsulesReceivedBy(String recipientEmail, int page, int limit) {
+        Users user = userRepository.findByEmail(recipientEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<String> receivedCapsuleIds = Optional.ofNullable(user.getReceivedCapsuleIds())
+                                                  .orElse(Collections.emptyList());
+
+        if (receivedCapsuleIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("dateToUnlock").descending());
+
+        Page<Capsules> pageResult = capsuleRepository.findByIdIn(receivedCapsuleIds, pageable);
+
+        pageResult.getContent().forEach(this::decryptIfUnlocked);
+
+        return pageResult;
     }
+
 
     public Optional<Capsules> getCapsuleById(String capsuleId) {
         return capsuleRepository.findById(capsuleId);

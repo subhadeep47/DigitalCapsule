@@ -1,6 +1,7 @@
 package com.backend.service;
 
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class UserService {
             throw new RuntimeException("User already exists with email: " + user.getEmail());
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(LocalDate.now());
         return userRepository.save(user);
     }
 
@@ -82,6 +84,7 @@ public class UserService {
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
     	searchUser.setAvatar(getInitials(user.getName()));
+    	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
     }
     

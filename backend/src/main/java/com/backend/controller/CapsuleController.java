@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,11 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.model.Capsules;
+import com.backend.model.PaginatedResponse;
 import com.backend.service.CapsuleService;
 import com.backend.utils.JwtUtils;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -54,22 +57,34 @@ public class CapsuleController {
 	    }
 
 	    @GetMapping("/created")
-	    public ResponseEntity<?> getCreatedCapsules(HttpServletRequest request) {
+	    public ResponseEntity<?> getCreatedCapsules(HttpServletRequest request, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "12") int limit) {
 	        try {
 	            String email = extractEmailFromToken(request);
-	            List<Capsules> capsules = capsuleService.getCapsulesCreatedBy(email);
-	            return ResponseEntity.ok(capsules);
+	            Page<Capsules> capsulesPage = capsuleService.getCapsulesCreatedBy(email, page, limit);
+	            
+	            PaginatedResponse<Capsules> response = new PaginatedResponse<>(
+	                    capsulesPage.getContent(),
+	                    new PaginatedResponse.Pagination(capsulesPage)
+	            );
+	            
+	            return ResponseEntity.ok(response);
 	        } catch (Exception e) {
 	            return ResponseEntity.status(401).body("Error fetching created capsules: " + e.getMessage());
 	        }
 	    }
 
 	    @GetMapping("/received")
-	    public ResponseEntity<?> getReceivedCapsules(HttpServletRequest request) {
+	    public ResponseEntity<?> getReceivedCapsules(HttpServletRequest request, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "12") int limit) {
 	        try {
 	            String email = extractEmailFromToken(request);
-	            List<Capsules> capsules = capsuleService.getCapsulesReceivedBy(email);
-	            return ResponseEntity.ok(capsules);
+	            Page<Capsules> capsulesPage = capsuleService.getCapsulesReceivedBy(email, page, limit);
+	            
+	            PaginatedResponse<Capsules> response = new PaginatedResponse<>(
+	                    capsulesPage.getContent(),
+	                    new PaginatedResponse.Pagination(capsulesPage)
+	            );
+	            
+	            return ResponseEntity.ok(response);
 	        } catch (Exception e) {
 	            return ResponseEntity.status(401).body("Error fetching received capsules: " + e.getMessage());
 	        }
