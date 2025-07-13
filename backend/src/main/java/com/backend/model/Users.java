@@ -1,5 +1,6 @@
 package com.backend.model;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -20,6 +21,7 @@ public class Users {
     private String name;
     private String email;
     private String password;
+    private LocalDate createdAt;
     private List<String> createdCapsuleIds;
     private List<String> receivedCapsuleIds;
 }

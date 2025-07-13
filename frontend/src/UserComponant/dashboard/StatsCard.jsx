@@ -1,7 +1,14 @@
 import { Calendar, Gift, Lock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../Componants/UiElements/card"
 
-const StatsCards = ({ myCapsules, receivedCapsules }) => {
+const StatsCards = ({
+  myCapsules,
+  receivedCapsules,
+  myPagination,
+  receivedPagination,
+  isLoadingMyCapsules,
+  isLoadingReceivedCapsules,
+}) => {
   const calculateTimeRemaining = (unlockDate) => {
     const now = new Date()
     now.setHours(0, 0, 0, 0) // Start of today
@@ -25,17 +32,24 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
     return unlockDate > today
   }
 
-  const totalCapsules = myCapsules.length + receivedCapsules.length
+  // Use pagination totals if available
+  const totalMyCapsules = myPagination?.totalItems ?? myCapsules.length
+  const totalReceivedCapsules = receivedPagination?.totalItems ?? receivedCapsules.length
+  const totalCapsules = totalMyCapsules + totalReceivedCapsules
 
-  const lockedCapsules = [...myCapsules, ...receivedCapsules].filter(isCapsulelocked).length
+  // Calculate locked capsules from current page data
+  const currentPageCapsules = [...myCapsules, ...receivedCapsules]
+  const lockedCapsules = currentPageCapsules.filter(isCapsulelocked).length
 
   const getNextUnlockCapsule = () => {
-    return [...myCapsules, ...receivedCapsules]
+    return currentPageCapsules
       .filter(isCapsulelocked)
       .sort((a, b) => new Date(a.dateToUnlock).getTime() - new Date(b.dateToUnlock).getTime())[0]
   }
 
   const nextUnlockCapsule = getNextUnlockCapsule()
+
+  const isLoading = isLoadingMyCapsules || isLoadingReceivedCapsules
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -47,10 +61,19 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{totalCapsules}</div>
-          <p className="text-slate-400 text-sm">
-            {myCapsules.length} created · {receivedCapsules.length} received
-          </p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 bg-slate-700 rounded w-16 mb-2"></div>
+              <div className="h-4 bg-slate-700 rounded w-32"></div>
+            </div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">{totalCapsules}</div>
+              <p className="text-slate-400 text-sm">
+                {totalMyCapsules} created · {totalReceivedCapsules} received
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -62,8 +85,19 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{lockedCapsules}</div>
-          <p className="text-slate-400 text-sm">Waiting to be unlocked</p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 bg-slate-700 rounded w-16 mb-2"></div>
+              <div className="h-4 bg-slate-700 rounded w-32"></div>
+            </div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">{lockedCapsules}</div>
+              <p className="text-slate-400 text-sm">
+                {currentPageCapsules.length > 0 ? "From current page" : "Waiting to be unlocked"}
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -75,7 +109,12 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {nextUnlockCapsule ? (
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 bg-slate-700 rounded w-16 mb-2"></div>
+              <div className="h-4 bg-slate-700 rounded w-32"></div>
+            </div>
+          ) : nextUnlockCapsule ? (
             <>
               <div className="text-3xl font-bold">
                 {new Date(nextUnlockCapsule.dateToUnlock).toLocaleDateString("en-US", {
@@ -88,7 +127,9 @@ const StatsCards = ({ myCapsules, receivedCapsules }) => {
           ) : (
             <>
               <div className="text-3xl font-bold">-</div>
-              <p className="text-slate-400 text-sm">No upcoming unlocks</p>
+              <p className="text-slate-400 text-sm">
+                {currentPageCapsules.length > 0 ? "No locked capsules on this page" : "No upcoming unlocks"}
+              </p>
             </>
           )}
         </CardContent>

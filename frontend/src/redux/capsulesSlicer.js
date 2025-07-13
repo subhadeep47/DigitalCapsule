@@ -3,6 +3,8 @@ import { createSlice } from "@reduxjs/toolkit"
 const initialState = {
   myCapsules: [],
   receivedCapsules: [],
+  myPagination: null,
+  receivedPagination: null,
   selectedCapsule: null,
   isModalOpen: false,
   searchQuery: "",
@@ -16,17 +18,30 @@ const capsulesSlicer = createSlice({
   reducers: {
     // Data actions
     setMyCapsules(state, action) {
-      state.myCapsules = action.payload
+      state.myCapsules = action.payload.capsules || action.payload
+      state.myPagination = action.payload.pagination || null
     },
     setReceivedCapsules(state, action) {
-      state.receivedCapsules = action.payload
+      state.receivedCapsules = action.payload.capsules || action.payload
+      state.receivedPagination = action.payload.pagination || null
     },
     addCapsule(state, action) {
-      state.myCapsules.push(action.payload)
+      state.myCapsules.unshift(action.payload) // Add to beginning
+      // Update pagination if it exists
+      if (state.myPagination) {
+        state.myPagination.totalItems += 1
+      }
     },
     removeCapsule(state, action) {
       state.myCapsules = state.myCapsules.filter((capsule) => capsule.id !== action.payload)
       state.receivedCapsules = state.receivedCapsules.filter((capsule) => capsule.id !== action.payload)
+      // Update pagination if it exists
+      if (state.myPagination) {
+        state.myPagination.totalItems = Math.max(0, state.myPagination.totalItems - 1)
+      }
+      if (state.receivedPagination) {
+        state.receivedPagination.totalItems = Math.max(0, state.receivedPagination.totalItems - 1)
+      }
     },
 
     // UI actions
@@ -37,7 +52,7 @@ const capsulesSlicer = createSlice({
       state.activeTab = action.payload
     },
     setSelectedCapsule(state, action) {
-      state.selectedCapsule = action.payload      
+      state.selectedCapsule = action.payload
     },
     setModalOpen(state, action) {
       state.isModalOpen = action.payload
