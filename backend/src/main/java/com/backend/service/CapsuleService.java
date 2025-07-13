@@ -111,7 +111,6 @@ public class CapsuleService {
         return pageResult;
     }
 
-
     public Page<Capsules> getCapsulesReceivedBy(String recipientEmail, int page, int limit) {
         Users user = userRepository.findByEmail(recipientEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));

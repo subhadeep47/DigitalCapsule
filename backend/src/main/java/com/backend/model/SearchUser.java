@@ -13,5 +13,5 @@ public class SearchUser {
 	private String name;
 	private String email;
 	private String avatar;
-	private  LocalDate createdAt;
+	private LocalDate createdAt;
 }
