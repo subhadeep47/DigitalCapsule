@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.backend.dto.SummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -188,5 +190,29 @@ public class CapsuleService {
     	LocalDate today = LocalDate.now();
         return !dateToUnlock.isAfter(today);
     }
-    
+
+    public SummaryResponse getDashboardSummary(String email) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() ->
+                new RuntimeException("User not found"));
+
+        List<Capsules> createdCapsules = Optional.ofNullable(user.getCreatedCapsuleIds())
+                .stream()
+                .flatMap(List::stream)
+                .flatMap(capsuleId -> capsuleRepository.findById(capsuleId).stream())
+                .peek(this::decryptIfUnlocked)
+                .toList();
+
+        List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
+                .stream()
+                .flatMap(List::stream)
+                .flatMap(capsuleId -> capsuleRepository.findById(capsuleId).stream())
+                .peek(this::decryptIfUnlocked)
+                .toList();
+
+        int createdCapsulesCount = createdCapsules.size();
+        int receivedCapsulesCount = receivedCapsules.size();
+        int totalCapsulesCount = createdCapsulesCount + receivedCapsulesCount;
+
+        return new SummaryResponse();
+    }
 }

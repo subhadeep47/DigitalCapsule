@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.backend.model.SearchUser;
+import com.backend.dto.SearchUser;
 import com.backend.model.Users;
 import com.backend.repositories.UserRepository;
 
