@@ -1,15 +1,12 @@
 package com.backend.service;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.backend.dto.SummaryResponse;
+import com.backend.utils.CapsuleAnalyticsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +39,9 @@ public class CapsuleService {
 	@Autowired
 	private FileService fileService;
 
+    @Autowired
+    private CapsuleAnalyticsUtils capsuleAnalyticsUtils;
+
     public Capsules createCapsule(Capsules capsule, List<MultipartFile> files, String email) throws IOException {
     	
     	if(files != null) {
@@ -66,7 +66,7 @@ public class CapsuleService {
 
         userRepository.findByEmail(capsule.getCreatedBy()).ifPresent(creator -> {
         	if(creator.getCreatedCapsuleIds() == null) {
-        		List<String> createdCapList = new ArrayList<String>();
+        		List<String> createdCapList = new ArrayList<>();
         		createdCapList.add(saved.getId());
         		creator.setCreatedCapsuleIds(createdCapList);
         	}else {
@@ -76,10 +76,10 @@ public class CapsuleService {
             userRepository.save(creator);
         });
 
-        for (String recipentEmail : capsule.getRecipientEmails()) {
-            userRepository.findByEmail(recipentEmail).ifPresent(recipient -> {
+        for (String recipientEmail : capsule.getRecipientEmails()) {
+            userRepository.findByEmail(recipientEmail).ifPresent(recipient -> {
             	if(recipient.getReceivedCapsuleIds() == null) {
-            		List<String> receivedCapList = new ArrayList<String>();
+            		List<String> receivedCapList = new ArrayList<>();
             		receivedCapList.add(saved.getId());
             		recipient.setReceivedCapsuleIds(receivedCapList);
             	}else {
@@ -108,7 +108,7 @@ public class CapsuleService {
 
         Page<Capsules> pageResult = capsuleRepository.findByIdIn(createdCapsuleIds, pageable);
 
-        pageResult.getContent().forEach(this::decryptIfUnlocked);
+        pageResult.getContent().forEach(capsuleAnalyticsUtils::decryptIfUnlocked);
 
         return pageResult;
     }
@@ -128,7 +128,7 @@ public class CapsuleService {
 
         Page<Capsules> pageResult = capsuleRepository.findByIdIn(receivedCapsuleIds, pageable);
 
-        pageResult.getContent().forEach(this::decryptIfUnlocked);
+        pageResult.getContent().forEach(capsuleAnalyticsUtils::decryptIfUnlocked);
 
         return pageResult;
     }
@@ -140,7 +140,7 @@ public class CapsuleService {
 
     public void deleteCapsule(String capsuleId, String email) {
         Optional<Capsules> optionalCapsule = capsuleRepository.findById(capsuleId);
-        if (!optionalCapsule.isPresent()) {
+        if (optionalCapsule.isEmpty()) {
             throw new RuntimeException("Capsule not found");
         }
 
@@ -172,24 +172,6 @@ public class CapsuleService {
         // Delete the capsule itself
         capsuleRepository.deleteById(capsuleId);
     }
-    
-    private void decryptIfUnlocked(Capsules capsule) {
-        if (capsule.getPersonalMessage() != null && isUnlocked(capsule.getDateToUnlock())) {
-            try {
-                capsule.setPersonalMessage(encryptionUtils.decrypt(capsule.getPersonalMessage()));
-            } catch (Exception e) {
-                capsule.setPersonalMessage(null); // fallback to hide on error
-            }
-        } else {
-            capsule.setPersonalMessage(null); // hide message if locked
-            capsule.setFileInfo(null);      
-        }
-    }
-
-    private boolean isUnlocked(LocalDate dateToUnlock) {
-    	LocalDate today = LocalDate.now();
-        return !dateToUnlock.isAfter(today);
-    }
 
     public SummaryResponse getDashboardSummary(String email) {
         Users user = userRepository.findByEmail(email).orElseThrow(() ->
@@ -199,20 +181,45 @@ public class CapsuleService {
                 .stream()
                 .flatMap(List::stream)
                 .flatMap(capsuleId -> capsuleRepository.findById(capsuleId).stream())
-                .peek(this::decryptIfUnlocked)
+                .peek(capsuleAnalyticsUtils::decryptIfUnlocked)
                 .toList();
 
         List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
                 .stream()
                 .flatMap(List::stream)
                 .flatMap(capsuleId -> capsuleRepository.findById(capsuleId).stream())
-                .peek(this::decryptIfUnlocked)
+                .peek(capsuleAnalyticsUtils::decryptIfUnlocked)
                 .toList();
 
-        int createdCapsulesCount = createdCapsules.size();
-        int receivedCapsulesCount = receivedCapsules.size();
-        int totalCapsulesCount = createdCapsulesCount + receivedCapsulesCount;
+        List<Capsules> allCapsules = new ArrayList<>();
+        allCapsules.addAll(createdCapsules);
+        allCapsules.addAll(receivedCapsules);
 
-        return new SummaryResponse();
+        int unlocked = (int) allCapsules.stream()
+                .filter(c -> capsuleAnalyticsUtils.isUnlocked(c.getDateToUnlock()))
+                .count();
+
+        int locked = allCapsules.size() - unlocked;
+
+        SummaryResponse res = new SummaryResponse();
+        res.setCreatedCapsules(createdCapsules.size());
+        res.setReceivedCapsules(receivedCapsules.size());
+        res.setTotalCapsules(allCapsules.size());
+        res.setUnlockedCapsules(unlocked);
+        res.setLockedCapsules(locked);
+        res.setUpcomingUnlocks(capsuleAnalyticsUtils.buildUpcoming(allCapsules));
+
+        Set<String> senderEmails = receivedCapsules.stream()
+                .map(Capsules::getCreatedBy)
+                .collect(Collectors.toSet());
+
+        List<Users> senders = userRepository.findAllByEmailIn(senderEmails);
+
+        Map<String, String> senderNameMap = senders.stream()
+                .collect(Collectors.toMap(Users::getEmail, Users::getName));
+
+        res.setNextUnlocks(capsuleAnalyticsUtils.buildNextUnlocks(createdCapsules, receivedCapsules, senderNameMap));
+
+        return res;
     }
 }
