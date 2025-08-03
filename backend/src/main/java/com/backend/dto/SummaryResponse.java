@@ -47,7 +47,7 @@ public class SummaryResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class MonthlyStats {
-        private String month; // "Jan", "Feb", etc.
+        private String month;
         private int created;
         private int received;
         private int unlocked;

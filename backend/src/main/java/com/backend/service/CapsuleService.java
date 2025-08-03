@@ -133,9 +133,11 @@ public class CapsuleService {
         return pageResult;
     }
 
-
-    public Optional<Capsules> getCapsuleById(String capsuleId) {
-        return capsuleRepository.findById(capsuleId);
+    public Capsules getCapsuleById(String capsuleId) {
+        Capsules capsule = capsuleRepository.findById(capsuleId)
+                .orElseThrow(() -> new RuntimeException("Capsule not found"));
+        capsuleAnalyticsUtils.decryptIfUnlocked(capsule);
+        return capsule;
     }
 
     public void deleteCapsule(String capsuleId, String email) {

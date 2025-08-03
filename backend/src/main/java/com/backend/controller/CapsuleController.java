@@ -129,4 +129,15 @@ public class CapsuleController {
 	    		return ResponseEntity.badRequest().body("Error while fetching dashboard summary details: " + e.getMessage());
 	    	}
 	    }
+
+		@GetMapping("/{id}")
+		public ResponseEntity<?> getCapsuleById(@PathVariable String id, HttpServletRequest request){
+			try {
+				String email = extractEmailFromToken(request);
+				Capsules capsule = capsuleService.getCapsuleById(id);
+				return ResponseEntity.ok(capsule);
+			} catch(Exception e) {
+				return ResponseEntity.badRequest().body("Error while fetching dashboard summary details: " + e.getMessage());
+			}
+		}
 }
