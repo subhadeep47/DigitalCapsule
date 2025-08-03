@@ -3,6 +3,7 @@ package com.backend.controller;
 import java.io.InputStream;
 import java.util.List;
 
+import com.backend.dto.SummaryResponse;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.model.Capsules;
-import com.backend.model.PaginatedResponse;
+import com.backend.dto.PaginatedResponse;
 import com.backend.service.CapsuleService;
 import com.backend.utils.JwtUtils;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -117,4 +118,26 @@ public class CapsuleController {
 	            return ResponseEntity.badRequest().body("Error deleting capsule: " + e.getMessage());
 	        }
 	    }
+	    
+	    @GetMapping("/dashboard-summary")
+	    public ResponseEntity<?> dashboardSummary(HttpServletRequest request){
+	    	try {
+				String email = extractEmailFromToken(request);
+				SummaryResponse summaryResponse = capsuleService.getDashboardSummary(email);
+	    		return ResponseEntity.ok(summaryResponse);
+	    	} catch(Exception e) {
+	    		return ResponseEntity.badRequest().body("Error while fetching dashboard summary details: " + e.getMessage());
+	    	}
+	    }
+
+		@GetMapping("/{id}")
+		public ResponseEntity<?> getCapsuleById(@PathVariable String id, HttpServletRequest request){
+			try {
+				String email = extractEmailFromToken(request);
+				Capsules capsule = capsuleService.getCapsuleById(id);
+				return ResponseEntity.ok(capsule);
+			} catch(Exception e) {
+				return ResponseEntity.badRequest().body("Error while fetching dashboard summary details: " + e.getMessage());
+			}
+		}
 }

@@ -1,4 +1,4 @@
-package com.backend.model;
+package com.backend.dto;
 
 import java.time.LocalDate;
 
