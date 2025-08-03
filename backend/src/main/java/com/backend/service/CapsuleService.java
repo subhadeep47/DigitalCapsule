@@ -181,7 +181,6 @@ public class CapsuleService {
                 .stream()
                 .flatMap(List::stream)
                 .flatMap(capsuleId -> capsuleRepository.findById(capsuleId).stream())
-                .peek(capsuleAnalyticsUtils::decryptIfUnlocked)
                 .toList();
 
         List<Capsules> receivedCapsules = Optional.ofNullable(user.getReceivedCapsuleIds())
@@ -219,6 +218,8 @@ public class CapsuleService {
                 .collect(Collectors.toMap(Users::getEmail, Users::getName));
 
         res.setNextUnlocks(capsuleAnalyticsUtils.buildNextUnlocks(createdCapsules, receivedCapsules, senderNameMap));
+        res.setMonthlyStats(capsuleAnalyticsUtils.buildMonthlyStats(createdCapsules, receivedCapsules, allCapsules));
+        res.setStorageUsed(capsuleAnalyticsUtils.calculateStorage(createdCapsules));
 
         return res;
     }
