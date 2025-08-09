@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
 import api from "../Utils/api"
 import UserProfileHeader from "./dashboard/UserProfileHeader";
+import DashboardSummary from "./dashboard/DashboardSummary";
 
 
 const Dashboard = () => {
@@ -135,6 +136,28 @@ const Dashboard = () => {
     dispatchAction(dispatch, ACTION_TYPES.SET_MODAL_OPEN, true)
   }
 
+  const handleViewCapsuleFromSummary = async (summaryItem) => {
+    try {
+      const response = await api.get(`/api/capsules/${summaryItem.id}`)
+      handleViewDetails(response.data)
+    } catch (error) {
+      console.error("Error fetching capsule details:", error)
+      const basicCapsule = {
+        id: summaryItem.id,
+        title: summaryItem.title,
+        unlockDate: summaryItem.unlockDate,
+        senderName: summaryItem.senderName,
+        recipientEmail: summaryItem.type === "created" ? "Unknown" : null,
+        senderEmail: summaryItem.type === "received" ? summaryItem.senderName : null,
+        description: "Loading...",
+        createdAt: new Date().toISOString(),
+        mediaCount: 0,
+        fileInfo: [],
+      }
+      handleViewDetails(basicCapsule)
+    }
+  }
+
   const handleDeleteCapsule = async (capsuleId) => {
     if (!window.confirm("Are you sure you want to delete this capsule? This action cannot be undone.")) {
       return
@@ -234,7 +257,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
+        {/* Stats Cards depreciated after introducing enhanced DashboardSummary
         <StatsCard
           myCapsules={myCapsules}
           receivedCapsules={receivedCapsules}
@@ -242,7 +265,11 @@ const Dashboard = () => {
           receivedPagination={receivedPagination}
           isLoadingMyCapsules={isLoadingMyCapsules}
           isLoadingReceivedCapsules={isLoadingReceivedCapsules}
-        />
+        /> */}
+
+        <div className="mb-8">
+          <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} />
+        </div>
 
         {/* Tabs for My Capsules and Received Capsules */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
