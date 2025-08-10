@@ -88,6 +88,10 @@ const Dashboard = () => {
     }
   }
 
+  const switchToTab = (tabName) => {
+    dispatchAction(dispatch, ACTION_TYPES.SET_ACTIVE_TAB, tabName)
+  }
+
   // Initial load
   useEffect(() => {
     const loggedIn = isLoggedIn || localStorage.getItem("isLoggedIn")
@@ -268,11 +272,11 @@ const Dashboard = () => {
         /> */}
 
         <div className="mb-8">
-          <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} />
+          <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} onTabChange={switchToTab} />
         </div>
 
         {/* Tabs for My Capsules and Received Capsules */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8" id="capsule-tabs-section">
           <TabsList className="bg-slate-800/50 border-slate-700">
             <TabsTrigger value="my-capsules">
               My Capsules ({myPagination?.totalItems || filteredMyCapsules.length})

@@ -120,10 +120,10 @@ public class CapsuleController {
 	    }
 	    
 	    @GetMapping("/dashboard-summary")
-	    public ResponseEntity<?> dashboardSummary(HttpServletRequest request){
+	    public ResponseEntity<?> dashboardSummary(HttpServletRequest request, @RequestParam String year){
 	    	try {
 				String email = extractEmailFromToken(request);
-				SummaryResponse summaryResponse = capsuleService.getDashboardSummary(email);
+				SummaryResponse summaryResponse = capsuleService.getDashboardSummary(email, year);
 	    		return ResponseEntity.ok(summaryResponse);
 	    	} catch(Exception e) {
 	    		return ResponseEntity.badRequest().body("Error while fetching dashboard summary details: " + e.getMessage());

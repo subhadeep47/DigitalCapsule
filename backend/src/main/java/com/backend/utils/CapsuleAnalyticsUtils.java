@@ -73,7 +73,7 @@ public class CapsuleAnalyticsUtils {
                     return !isUnlocked(date);
                 })
                 .sorted(Comparator.comparing(SummaryResponse.NextUnlock::getUnlockDate))
-                .limit(5)
+                .limit(6)
                 .collect(Collectors.toList());
     }
 
@@ -108,8 +108,24 @@ public class CapsuleAnalyticsUtils {
         return Math.round(v * 100.0) / 100.0;
     }
 
-    public List<SummaryResponse.MonthlyStats> buildMonthlyStats(List<Capsules> created, List<Capsules> received, List<Capsules> all) {
+    public List<SummaryResponse.MonthlyStats> buildMonthlyStats(List<Capsules> created, List<Capsules> received, List<Capsules> all, String year) {
         Map<String, SummaryResponse.MonthlyStats> statsMap = new LinkedHashMap<>();
+
+        created = created.stream()
+                .filter(capsules -> {
+                    return capsules.getDateToUnlock().getYear() == Integer.parseInt(year);
+                })
+                .toList();
+        received = received.stream()
+                .filter(capsules -> {
+                    return capsules.getDateToUnlock().getYear() == Integer.parseInt(year);
+                })
+                .toList();
+        all = all.stream()
+                .filter(capsules -> {
+                    return capsules.getDateToUnlock().getYear() == Integer.parseInt(year);
+                })
+                .toList();
 
         for (Capsules c : created) {
             String month = getMonthKeyWithYear(c);
