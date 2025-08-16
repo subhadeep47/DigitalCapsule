@@ -72,30 +72,6 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
     }, 100)
   }
 
-  const getUserJoinYear = () => {
-    if (!user?.createdAt) return new Date().getFullYear()
-    return new Date(user.createdAt).getFullYear()
-  }
-
-  const canNavigateYear = (direction) => {
-    const currentDate = new Date()
-    const userJoinYear = getUserJoinYear()
-
-    if (direction === "prev") {
-      return currentYear > userJoinYear
-    } else {
-      return currentYear < currentDate.getFullYear()
-    }
-  }
-
-  const navigateYear = (direction) => {
-    if (direction === "prev" && canNavigateYear("prev")) {
-      setCurrentYear(currentYear - 1)
-    } else if (direction === "next" && canNavigateYear("next")) {
-      setCurrentYear(currentYear + 1)
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -195,13 +171,13 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
                   Next {summaryData.nextUnlocks.length} capsules unlocking soon
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 lg:flex-shrink-0">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => navigateToTab("my-capsules")}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs whitespace-nowrap"
                 >
                   View My Capsules
                 </Button>
@@ -210,7 +186,7 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigateToTab("received")}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs whitespace-nowrap"
                 >
                   View Received
                 </Button>
@@ -293,8 +269,7 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigateYear("prev")}
-                  disabled={!canNavigateYear("prev")}
+                  onClick={() => setCurrentYear(currentYear - 1)}
                   className="h-8 w-8 p-0 text-slate-400 hover:text-white disabled:opacity-30"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -306,8 +281,7 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigateYear("next")}
-                  disabled={!canNavigateYear("next")}
+                  onClick={() => setCurrentYear(currentYear + 1)}
                   className="h-8 w-8 p-0 text-slate-400 hover:text-white disabled:opacity-30"
                 >
                   <ChevronRight className="h-4 w-4" />
