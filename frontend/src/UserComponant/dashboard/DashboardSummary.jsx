@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
-import { useDispatch } from "react-redux"
-import { Calendar, Clock, TrendingUp, HardDrive } from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import { Calendar, Clock, TrendingUp, HardDrive, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../Componants/UiElements/card"
 import { Button } from "../../Componants/UiElements/button"
 import { Progress } from "../../Componants/UiElements/progress"
@@ -9,19 +9,21 @@ import { Badge } from "../../Componants/UiElements/badge"
 import api from "../../Utils/api"
 import { dispatchAction, ACTION_TYPES } from "../../redux/actionDispatcher"
 
-const DashboardSummary = ({ onViewCapsule }) => {
+const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
   const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
   const [summaryData, setSummaryData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     fetchDashboardSummary()
-  }, [])
+  }, [currentYear])
 
   const fetchDashboardSummary = async () => {
     try {
       setIsLoading(true)
-      const response = await api.get("/api/capsules/dashboard-summary")
+      const response = await api.get(`/api/capsules/dashboard-summary?year=${currentYear}`)
       setSummaryData(response.data)
     } catch (error) {
       console.error("Error fetching dashboard summary:", error)
@@ -53,6 +55,23 @@ const DashboardSummary = ({ onViewCapsule }) => {
     return "text-indigo-400 bg-indigo-900/20 border-indigo-800"
   }
 
+  const navigateToTab = (tabType) => {
+    if (onTabChange) {
+      onTabChange(tabType)
+    }
+
+    setTimeout(() => {
+      const tabsSection = document.getElementById("capsule-tabs-section")
+      if (tabsSection) {
+        tabsSection.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        })
+      }
+    }, 100)
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -60,7 +79,7 @@ const DashboardSummary = ({ onViewCapsule }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="bg-slate-800/50 border-slate-700">
-              <CardContent className="p-6">
+              <CardContent className="pt-6">
                 <div className="animate-pulse">
                   <div className="h-4 bg-slate-700 rounded w-20 mb-2"></div>
                   <div className="h-8 bg-slate-700 rounded w-16 mb-2"></div>
@@ -142,17 +161,41 @@ const DashboardSummary = ({ onViewCapsule }) => {
       {summaryData.nextUnlocks && summaryData.nextUnlocks.length > 0 && (
         <Card className="bg-slate-800/50 border-slate-700 text-white">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center">
-              <Clock className="mr-2 h-5 w-5 text-indigo-400" />
-              Upcoming Unlocks
-            </CardTitle>
-            <p className="text-slate-400 text-sm">
-              {summaryData.upcomingUnlocks.next30Days} capsules unlocking in the next 30 days
-            </p>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-xl flex items-center">
+                  <Clock className="mr-2 h-5 w-5 text-indigo-400" />
+                  Upcoming Unlocks
+                </CardTitle>
+                <p className="text-slate-400 text-sm mt-1">
+                  Next {summaryData.nextUnlocks.length} capsules unlocking soon
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 lg:flex-shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateToTab("my-capsules")}
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs whitespace-nowrap"
+                >
+                  View My Capsules
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateToTab("received")}
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs whitespace-nowrap"
+                >
+                  View Received
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {summaryData.nextUnlocks.slice(0, 6).map((capsule) => (
+              {summaryData.nextUnlocks.map((capsule) => (
                 <div
                   key={capsule.id}
                   className={`p-4 rounded-lg border transition-all hover:scale-105 cursor-pointer ${getUrgencyColor(capsule.daysRemaining)}`}
@@ -187,6 +230,7 @@ const DashboardSummary = ({ onViewCapsule }) => {
                     <div className="flex justify-between items-center mt-3">
                       <span className="text-sm font-medium">{calculateTimeRemaining(capsule.unlockDate)}</span>
                       <Button
+                        type="button"
                         size="sm"
                         variant="ghost"
                         className="text-xs hover:bg-white/10"
@@ -202,76 +246,127 @@ const DashboardSummary = ({ onViewCapsule }) => {
                 </div>
               ))}
             </div>
-
-            {summaryData.nextUnlocks.length > 6 && (
-              <div className="text-center mt-4">
-                <Button variant="outline" className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
-                  View All Upcoming ({summaryData.nextUnlocks.length})
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
 
       {/* Monthly Activity Chart */}
-      {summaryData.monthlyStats && summaryData.monthlyStats.length > 0 && (
+      {summaryData.monthlyStats && (
         <Card className="bg-slate-800/50 border-slate-700 text-white">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5 text-green-400" />
-              Monthly Activity
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl flex items-center">
+                  <TrendingUp className="mr-2 h-5 w-5 text-green-400" />
+                  Monthly Activity - {currentYear}
+                </CardTitle>
+                <p className="text-slate-400 text-sm mt-1">Your capsule activity throughout the year</p>
+              </div>
+
+              {/* Year Navigation */}
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentYear(currentYear - 1)}
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-white disabled:opacity-30"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <span className="text-sm font-medium min-w-[60px] text-center">{currentYear}</span>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentYear(currentYear + 1)}
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-white disabled:opacity-30"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {summaryData.monthlyStats.map((month, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <span className="text-sm font-medium w-20">{month.month}</span>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex justify-between text-xs text-slate-400">
-                        <span>Created: {month.created}</span>
-                        <span>Received: {month.received}</span>
-                        <span>Unlocked: {month.unlocked}</span>
-                      </div>
-                      <div className="flex space-x-1">
-                        <div
-                          className="h-2 bg-blue-500 rounded"
-                          style={{
-                            width: `${(month.created / Math.max(month.created + month.received + month.unlocked, 1)) * 100}%`,
-                          }}
-                        ></div>
-                        <div
-                          className="h-2 bg-green-500 rounded"
-                          style={{
-                            width: `${(month.received / Math.max(month.created + month.received + month.unlocked, 1)) * 100}%`,
-                          }}
-                        ></div>
-                        <div
-                          className="h-2 bg-yellow-500 rounded"
-                          style={{
-                            width: `${(month.unlocked / Math.max(month.created + month.received + month.unlocked, 1)) * 100}%`,
-                          }}
-                        ></div>
+            {summaryData.monthlyStats.length === 0 ? (
+              <div className="text-center py-8">
+                <TrendingUp className="h-12 w-12 text-slate-400 mx-auto mb-3 opacity-50" />
+                <p className="text-slate-400">No activity in {currentYear}</p>
+                <p className="text-slate-500 text-sm mt-1">
+                  {currentYear === new Date().getFullYear()
+                    ? "Start creating capsules to see your activity here!"
+                    : "You weren't active during this year"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {summaryData.monthlyStats.map((month, index) => {
+                  const maxActivity = Math.max(month.created + month.received + month.unlocked, 1)
+                  const hasActivity = month.created > 0 || month.received > 0 || month.unlocked > 0
+
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center justify-between ${!hasActivity ? "opacity-50" : ""}`}
+                    >
+                      <div className="flex items-center space-x-4 flex-1">
+                        <span className="text-sm font-medium w-20">{month.month}</span>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex justify-between text-xs text-slate-400">
+                            <span>Created: {month.created}</span>
+                            <span>Received: {month.received}</span>
+                            <span>Unlocked: {month.unlocked}</span>
+                          </div>
+                          {hasActivity ? (
+                            <div className="flex space-x-1 h-2">
+                              {month.created > 0 && (
+                                <div
+                                  className="bg-blue-500 rounded"
+                                  style={{ width: `${(month.created / maxActivity) * 100}%` }}
+                                  title={`Created: ${month.created}`}
+                                ></div>
+                              )}
+                              {month.received > 0 && (
+                                <div
+                                  className="bg-green-500 rounded"
+                                  style={{ width: `${(month.received / maxActivity) * 100}%` }}
+                                  title={`Received: ${month.received}`}
+                                ></div>
+                              )}
+                              {month.unlocked > 0 && (
+                                <div
+                                  className="bg-yellow-500 rounded"
+                                  style={{ width: `${(month.unlocked / maxActivity) * 100}%` }}
+                                  title={`Unlocked: ${month.unlocked}`}
+                                ></div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="h-2 bg-slate-700 rounded opacity-30"></div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-center space-x-6 mt-4 text-xs">
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Legend */}
+            <div className="flex justify-center space-x-6 mt-6 pt-4 border-t border-slate-700">
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                <span className="text-slate-400">Created</span>
+                <span className="text-slate-400 text-sm">Created</span>
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
-                <span className="text-slate-400">Received</span>
+                <span className="text-slate-400 text-sm">Received</span>
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
-                <span className="text-slate-400">Unlocked</span>
+                <span className="text-slate-400 text-sm">Unlocked</span>
               </div>
             </div>
           </CardContent>

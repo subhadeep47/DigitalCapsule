@@ -175,7 +175,7 @@ public class CapsuleService {
         capsuleRepository.deleteById(capsuleId);
     }
 
-    public SummaryResponse getDashboardSummary(String email) {
+    public SummaryResponse getDashboardSummary(String email, String year) {
         Users user = userRepository.findByEmail(email).orElseThrow(() ->
                 new RuntimeException("User not found"));
 
@@ -220,7 +220,7 @@ public class CapsuleService {
                 .collect(Collectors.toMap(Users::getEmail, Users::getName));
 
         res.setNextUnlocks(capsuleAnalyticsUtils.buildNextUnlocks(createdCapsules, receivedCapsules, senderNameMap));
-        res.setMonthlyStats(capsuleAnalyticsUtils.buildMonthlyStats(createdCapsules, receivedCapsules, allCapsules));
+        res.setMonthlyStats(capsuleAnalyticsUtils.buildMonthlyStats(createdCapsules, receivedCapsules, allCapsules, year));
         res.setStorageUsed(capsuleAnalyticsUtils.calculateStorage(createdCapsules));
 
         return res;
