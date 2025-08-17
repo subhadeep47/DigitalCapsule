@@ -1,13 +1,15 @@
 "use client"
 import { useSelector } from "react-redux"
 import { useState, useRef, useEffect } from "react"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Settings } from "lucide-react"
 import { Button } from "../../Componants/UiElements/button"
+import { useNavigate } from "react-router-dom"
 
 const UserProfileHeader = () => {
   const { user } = useSelector((state) => state.auth)
   const [isExpanded, setIsExpanded] = useState(false)
   const dropdownRef = useRef(null)
+  const navigate = useNavigate()
 
   const getDisplayName = () => {
     if (!user) return "User"
@@ -33,6 +35,11 @@ const UserProfileHeader = () => {
     }
   }, [isExpanded])
 
+  const handleProfileSettings = () => {
+    setIsExpanded(false)
+    navigate("/profile")
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
@@ -40,10 +47,12 @@ const UserProfileHeader = () => {
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-800/50 transition-colors"
       >
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-          {avatar}
+        {/* Avatar */}
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg overflow-hidden">
+          <img src={avatar || "/placeholder.svg"} alt={displayName} className="w-full h-full object-cover" />
         </div>
 
+        {/* User Info - Show name on desktop, hide on mobile */}
         <div className="text-left hidden sm:block">
           <p className="text-white font-medium text-sm">{displayName}</p>
           <p className="text-slate-400 text-xs truncate max-w-[150px]">{user?.email}</p>
@@ -57,10 +66,18 @@ const UserProfileHeader = () => {
       </Button>
 
       {isExpanded && (
-        <div className="absolute top-full mt-2 bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-xl z-50 w-[280px] right-0 sm:right-0">
+        <div
+          className="absolute top-full mt-2 bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-xl z-50 w-[280px] right-0 sm:right-0 
+                        max-[480px]:right-0 max-[480px]:translate-x-0 max-[480px]:w-[260px]
+                        max-[360px]:right-0 max-[360px]:translate-x-2 max-[360px]:w-[240px]"
+        >
           <div className="flex items-center space-x-3 mb-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg">
-              {avatar}
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg overflow-hidden">
+              {user?.avatar ? (
+                <img src={user.avatar || "/placeholder.svg"} alt={displayName} className="w-full h-full object-cover" />
+              ) : (
+                avatar
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-medium text-base truncate">{displayName}</p>
@@ -82,7 +99,15 @@ const UserProfileHeader = () => {
             </div>
 
             <div className="border-t border-slate-700 pt-3 mt-3">
-              <p className="text-slate-400 text-xs text-center">🚀 Profile settings and more options coming soon!</p>
+              <Button
+                onClick={handleProfileSettings}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Profile Settings
+              </Button>
             </div>
           </div>
         </div>
