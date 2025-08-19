@@ -20,7 +20,6 @@ const ProfileTab = ({ user }) => {
   const [errors, setErrors] = useState({})
   const [successMessage, setSuccessMessage] = useState("")
 
-  // Initialize form data when user changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -36,7 +35,6 @@ const ProfileTab = ({ user }) => {
       [field]: value,
     }))
 
-    // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => ({
         ...prev,
@@ -44,7 +42,6 @@ const ProfileTab = ({ user }) => {
       }))
     }
 
-    // Clear success message when user starts editing
     if (successMessage) {
       setSuccessMessage("")
     }

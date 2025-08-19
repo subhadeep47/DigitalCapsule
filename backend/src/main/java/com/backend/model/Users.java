@@ -22,6 +22,7 @@ public class Users {
     private String email;
     private String password;
     private LocalDate createdAt;
+    private String profilePictureUrl;
     private List<String> createdCapsuleIds;
     private List<String> receivedCapsuleIds;
 }

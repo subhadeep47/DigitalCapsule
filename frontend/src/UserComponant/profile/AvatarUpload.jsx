@@ -52,9 +52,9 @@ const AvatarUpload = ({ user }) => {
       setUploadError(null)
 
       const formData = new FormData()
-      formData.append("avatar", file)
+      formData.append("file", file)
 
-      const response = await api.post("/api/user/avatar", formData, {
+      const response = await api.post("/auth/update-profile-photo", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -62,7 +62,7 @@ const AvatarUpload = ({ user }) => {
 
       const updatedUser = {
         ...user,
-        avatar: response.data.avatarUrl,
+        avatar: response.data.avatar,
       }
       dispatchAction(dispatch, ACTION_TYPES.CURRENT_USER, updatedUser)
       event.target.value = ""

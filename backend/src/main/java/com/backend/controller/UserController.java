@@ -1,8 +1,10 @@
 package com.backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import com.backend.utils.JwtUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/auth")
@@ -81,6 +84,22 @@ public class UserController {
             return ResponseEntity.status(500).body("Search failed: " + e.getMessage());
         }
     }
+
+    @PostMapping(value = "/update-profile-photo", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public  ResponseEntity<?> updateProfilePhoto(@RequestBody MultipartFile file, HttpServletRequest request){
+        try {
+            String token = jwtUtil.extractJwtFromCookies(request);
+            if (token == null) {
+                return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+            }
+            String email = jwtUtil.extractEmail(token);
+            String url = usersService.updateProfilePhoto(file, email);
+            return ResponseEntity.ok(Map.of("avatar", url));
+        } catch (Exception e) {
+            return  ResponseEntity.status(500).body("Server error: "+ e.getMessage());
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
          ResponseCookie cookie = ResponseCookie.from("jwt", "")
