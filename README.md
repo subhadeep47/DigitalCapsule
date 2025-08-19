@@ -44,7 +44,7 @@ Time Capsule is a modern web application that allows users to create digital tim
 ## 🖼️ Screenshots
 
 ### Enhanced Dashboard with Analytics
-![Dashboard Overview](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-45B4VroG0f2Wz89YrcKLjjbTWJ33Ki.png)
+![Dashboard Overview](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ulYRqGbP5be0N45HMSuD3XMs2S2H1m.png)
 *Smart dashboard featuring real-time statistics, upcoming unlocks with countdown timers, and monthly activity visualization*
 
 ### Capsule Management Interface
