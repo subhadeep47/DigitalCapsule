@@ -10,6 +10,7 @@ import {
   setModalOpen,
   setError,
   clearError,
+  setDashboardSummary
 } from "./capsulesSlicer"
 
 export const ACTION_TYPES = {
@@ -33,6 +34,9 @@ export const ACTION_TYPES = {
   // Error actions
   SET_ERROR: "SET_ERROR",
   CLEAR_ERROR: "CLEAR_ERROR",
+
+  // Dashboard summary
+  SET_DASHBOARD_SUMMARY: "SET_DASHBOARD_SUMMARY",
 }
 
 export const dispatchAction = (dispatch, type, payload) => {
@@ -61,6 +65,9 @@ export const dispatchAction = (dispatch, type, payload) => {
     case ACTION_TYPES.REMOVE_CAPSULE:
       dispatch(removeCapsule(payload))
       break
+    case ACTION_TYPES.SET_DASHBOARD_SUMMARY:
+    dispatch(setDashboardSummary(payload))
+    break
 
     // UI actions
     case ACTION_TYPES.SET_SEARCH_QUERY:

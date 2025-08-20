@@ -1,6 +1,7 @@
 package com.backend.service;
 
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,16 @@ import org.springframework.stereotype.Service;
 import com.backend.dto.SearchUser;
 import com.backend.model.Users;
 import com.backend.repositories.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    
+
+    @Autowired
+    private AwsServices awsServices;
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -83,7 +88,8 @@ public class UserService {
     	SearchUser searchUser = new SearchUser();
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
-    	searchUser.setAvatar(getInitials(user.getName()));
+        searchUser.setBio(user.getBio());
+    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> getInitials(user.getName())));
     	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
     }
@@ -92,5 +98,23 @@ public class UserService {
     	String[] names = name.split(" ");
     	char firstInitial = names[0].toUpperCase().charAt(0);
     	return names.length > 1 ? "" + firstInitial + names[names.length - 1].toUpperCase().charAt(0) : "" + firstInitial + firstInitial;
+    }
+
+    public String updateProfilePhoto(MultipartFile file, String email) throws IOException {
+        Users user = getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        if(user.getProfilePictureUrl() != null ){
+            awsServices.deleteFile(user.getProfilePictureUrl());
+        }
+        String url = awsServices.uploadProfilePicture(file, user.getId());
+        user.setProfilePictureUrl(url);
+        userRepository.save(user);
+        return  url;
+    }
+
+    public void updateProfile(String email, SearchUser updatedUser) throws IOException{
+        Users user = getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setName(updatedUser.getName());
+        user.setBio(updatedUser.getBio());
+        userRepository.save(user);
     }
 }

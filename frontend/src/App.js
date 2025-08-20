@@ -5,6 +5,7 @@ import NotFound from './Componants/NotFound';
 import Auth from './Componants/Auth';
 import Dashboard from './UserComponant/Dashboard';
 import CreateCapsule from './UserComponant/CreateCapsule';
+import ProfileSettingsPage from './UserComponant/profile/ProfileSettingsPage';
 
 function App() {
   return (
@@ -14,8 +15,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/*<Route path="capsule/:id" element={<CapsuleDetail />} /> */}
           <Route path="create" element={<CreateCapsule />} />
+          <Route path='/profile' element={<ProfileSettingsPage />} />
           {/* <Route path="capsules" element={<CapsuleList />} /> will use this when we will implement public capsule exploration page*/}
         </Route>
 

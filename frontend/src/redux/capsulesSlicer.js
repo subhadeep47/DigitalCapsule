@@ -10,6 +10,7 @@ const initialState = {
   searchQuery: "",
   activeTab: "my-capsules",
   error: null,
+  dashboardSummary: null
 }
 
 const capsulesSlicer = createSlice({
@@ -65,6 +66,10 @@ const capsulesSlicer = createSlice({
     clearError(state) {
       state.error = null
     },
+
+    setDashboardSummary(state, action) {
+      state.dashboardSummary = action.payload
+    }
   },
 })
 
@@ -79,6 +84,7 @@ export const {
   setModalOpen,
   setError,
   clearError,
+  setDashboardSummary
 } = capsulesSlicer.actions
 
 export default capsulesSlicer

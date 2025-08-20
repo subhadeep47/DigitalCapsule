@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import { Calendar, Clock, TrendingUp, HardDrive, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../Componants/UiElements/card"
 import { Button } from "../../Componants/UiElements/button"
@@ -11,7 +11,6 @@ import { dispatchAction, ACTION_TYPES } from "../../redux/actionDispatcher"
 
 const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.auth)
   const [summaryData, setSummaryData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
@@ -25,6 +24,7 @@ const DashboardSummary = ({ onViewCapsule, onTabChange }) => {
       setIsLoading(true)
       const response = await api.get(`/api/capsules/dashboard-summary?year=${currentYear}`)
       setSummaryData(response.data)
+      dispatchAction(dispatch, ACTION_TYPES.SET_DASHBOARD_SUMMARY, response.data)
     } catch (error) {
       console.error("Error fetching dashboard summary:", error)
       dispatchAction(dispatch, ACTION_TYPES.SET_ERROR, "Failed to load dashboard summary")
