@@ -88,6 +88,7 @@ public class UserService {
     	SearchUser searchUser = new SearchUser();
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
+        searchUser.setBio(user.getBio());
     	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> getInitials(user.getName())));
     	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
@@ -108,5 +109,12 @@ public class UserService {
         user.setProfilePictureUrl(url);
         userRepository.save(user);
         return  url;
+    }
+
+    public void updateProfile(String email, SearchUser updatedUser) throws IOException{
+        Users user = getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setName(updatedUser.getName());
+        user.setBio(updatedUser.getBio());
+        userRepository.save(user);
     }
 }

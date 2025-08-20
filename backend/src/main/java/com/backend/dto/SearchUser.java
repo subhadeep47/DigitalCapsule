@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class SearchUser {
 	private String name;
 	private String email;
+	private String bio;
 	private String avatar;
 	private LocalDate createdAt;
 }

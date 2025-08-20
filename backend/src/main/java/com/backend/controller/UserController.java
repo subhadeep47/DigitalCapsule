@@ -7,12 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseCookie;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.backend.dto.SearchUser;
 import com.backend.model.Users;
@@ -95,6 +90,21 @@ public class UserController {
             String email = jwtUtil.extractEmail(token);
             String url = usersService.updateProfilePhoto(file, email);
             return ResponseEntity.ok(Map.of("avatar", url));
+        } catch (Exception e) {
+            return  ResponseEntity.status(500).body("Server error: "+ e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/update-profile")
+    public  ResponseEntity<?> updateProfile(@RequestBody SearchUser updatedUser, HttpServletRequest request){
+        try {
+            String token = jwtUtil.extractJwtFromCookies(request);
+            if (token == null) {
+                return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+            }
+            String email = jwtUtil.extractEmail(token);
+            usersService.updateProfile(email, updatedUser);
+            return ResponseEntity.ok("Profile updated successfully");
         } catch (Exception e) {
             return  ResponseEntity.status(500).body("Server error: "+ e.getMessage());
         }

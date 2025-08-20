@@ -75,16 +75,15 @@ const ProfileTab = ({ user }) => {
       setIsLoading(true)
       setErrors({})
 
-      const updateData = {
-        name: formData.name.trim(),
-        bio: formData.bio.trim(),
-      }
-
-      await api.put("/api/user/profile", updateData)
       const updatedUser = {
         ...user,
-        ...updateData,
+        ...{
+          name: formData.name.trim(),
+          bio: formData.bio.trim(),
+        }
       }
+
+      await api.put("/auth/update-profile", updatedUser)
 
       dispatchAction(dispatch, ACTION_TYPES.CURRENT_USER, updatedUser)
       setSuccessMessage("Profile updated successfully!")
