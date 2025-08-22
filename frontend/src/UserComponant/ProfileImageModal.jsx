@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
-import { X, Download, User } from "lucide-react"
-import { Modal, ModalContent } from "../../Componants/UiElements/modal"
-import { Button } from "../../Componants/UiElements/button"
+import { X, User } from "lucide-react"
+import { Modal, ModalContent } from "../Componants/UiElements/modal"
+import { Button } from "../Componants/UiElements/button"
 
 const ProfileImageModal = ({ isOpen, onClose, user, imageUrl }) => {
   const [imageLoading, setImageLoading] = useState(true)
