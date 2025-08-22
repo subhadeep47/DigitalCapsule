@@ -65,7 +65,7 @@ public class UserController {
         }
     }
     
-    @GetMapping("/search")
+    @GetMapping("/search-recipient")
     public ResponseEntity<?> searchUsers(@RequestParam("query") String query, HttpServletRequest request) {
         try {
         	String token = jwtUtil.extractJwtFromCookies(request);

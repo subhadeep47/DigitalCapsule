@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchUser {
+
+	private String userId;
 	private String name;
 	private String email;
 	private String bio;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"
-import { Plus, Search } from "lucide-react"
+import { Plus, Search, Users } from "lucide-react"
 import { Button } from "../Componants/UiElements/button"
 import { Input } from "../Componants/UiElements/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Componants/UiElements/tabs"
@@ -16,6 +16,7 @@ import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
 import api from "../Utils/api"
 import UserProfileHeader from "./dashboard/UserProfileHeader";
 import DashboardSummary from "./dashboard/DashboardSummary";
+import UserSearchModal from "./social/UserSearchModal";
 
 
 const Dashboard = () => {
@@ -39,6 +40,7 @@ const Dashboard = () => {
   const [isLoadingReceivedCapsules, setIsLoadingReceivedCapsules] = useState(false)
   const [isLoadingUser, setIsLoadingUser] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
 
   // Pagination states
   const [myCurrentPage, setMyCurrentPage] = useState(1)
@@ -239,12 +241,21 @@ const Dashboard = () => {
               />
             </div>
           </div>
-          <Button
-            onClick={navigateToCreateCapsule}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Create New Capsule
-          </Button>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <Button
+              onClick={() => setIsUserSearchModalOpen(true)}
+              variant="outline"
+              className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:border-indigo-500 w-full sm:w-auto"
+            >
+              <Users className="mr-2 h-4 w-4" /> Discover Users
+            </Button>
+            <Button
+              onClick={navigateToCreateCapsule}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Create New Capsule
+            </Button>
+          </div>
         </div>
 
         {/* Error Display */}
@@ -331,6 +342,9 @@ const Dashboard = () => {
 
         {/* Capsule Detail Modal */}
         <CapsuleDetailModal capsule={selectedCapsule} isOpen={isModalOpen} onClose={handleCloseModal} />
+
+        {/* User Search Modal */}
+        <UserSearchModal isOpen={isUserSearchModalOpen} onClose={() => setIsUserSearchModalOpen(false)} />
       </div>
     </div>
   )

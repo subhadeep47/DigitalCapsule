@@ -3,9 +3,9 @@ import { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
 import { Camera, Upload, Loader2, Eye } from "lucide-react"
 import { Button } from "../../Componants/UiElements/button"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../Componants/UiElements/tooltip"
+import { Tooltip, TooltipTrigger, TooltipProvider } from "../../Componants/UiElements/tooltip"
 import { dispatchAction, ACTION_TYPES } from "../../redux/actionDispatcher"
-import ProfileImageModal from "./ProfileImageModal"
+import ProfileImageModal from "../ProfileImageModal"
 import api from "../../Utils/api"
 
 const AvatarUpload = ({ user }) => {
@@ -87,9 +87,7 @@ const AvatarUpload = ({ user }) => {
   return (
     <TooltipProvider>
       <div className="relative group">
-        <div
-          className={`relative h-24 w-24 rounded-full overflow-hidden border-4 border-slate-600 hover:border-indigo-500 transition-colors`}
-        >
+        <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-slate-600 hover:border-indigo-500 transition-colors">
           {getAvatarDisplay()}
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             {isUploading && (

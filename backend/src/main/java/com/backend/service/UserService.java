@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.backend.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class UserService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private Utils utils;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -75,7 +79,7 @@ public class UserService {
     			SearchUser searchUser = new SearchUser();
             	searchUser.setEmail(user.getEmail());
             	searchUser.setName(user.getName());
-            	searchUser.setAvatar(getInitials(user.getName()));
+            	searchUser.setAvatar(utils.getInitials(user.getName()));
             	searchUsers.add(searchUser);
     		}
     	}
@@ -89,15 +93,9 @@ public class UserService {
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
         searchUser.setBio(user.getBio());
-    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> getInitials(user.getName())));
+    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utils.getInitials(user.getName())));
     	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
-    }
-    
-    public String getInitials(String name) {
-    	String[] names = name.split(" ");
-    	char firstInitial = names[0].toUpperCase().charAt(0);
-    	return names.length > 1 ? "" + firstInitial + names[names.length - 1].toUpperCase().charAt(0) : "" + firstInitial + firstInitial;
     }
 
     public String updateProfilePhoto(MultipartFile file, String email) throws IOException {
