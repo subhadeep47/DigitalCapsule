@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.backend.utils.Utils;
+import com.backend.utils.Utiliy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private Utils utils;
+    private Utiliy utiliy;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -79,7 +79,7 @@ public class UserService {
     			SearchUser searchUser = new SearchUser();
             	searchUser.setEmail(user.getEmail());
             	searchUser.setName(user.getName());
-            	searchUser.setAvatar(utils.getInitials(user.getName()));
+            	searchUser.setAvatar(utiliy.getInitials(user.getName()));
             	searchUsers.add(searchUser);
     		}
     	}
@@ -93,7 +93,7 @@ public class UserService {
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
         searchUser.setBio(user.getBio());
-    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utils.getInitials(user.getName())));
+    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utiliy.getInitials(user.getName())));
     	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
     }

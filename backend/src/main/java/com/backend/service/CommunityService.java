@@ -4,7 +4,7 @@ import com.backend.dto.PublicProfile;
 import com.backend.dto.SearchUser;
 import com.backend.model.Users;
 import com.backend.repositories.UserRepository;
-import com.backend.utils.Utils;
+import com.backend.utils.Utiliy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class CommunityService {
     private UserRepository userRepository;
 
     @Autowired
-    private Utils utils;
+    private Utiliy utiliy;
 
     public List<SearchUser> searchUsers(String query, String email) {
         Users currentUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -33,7 +33,7 @@ public class CommunityService {
                 searchUser.setEmail(user.getEmail());
                 searchUser.setName(user.getName());
                 searchUser.setCreatedAt(user.getCreatedAt());
-                searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utils.getInitials(user.getName())));
+                searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utiliy.getInitials(user.getName())));
                 searchUsers.add(searchUser);
             }
         }
@@ -50,7 +50,7 @@ public class CommunityService {
         publicProfile.setName(user.getName());
         publicProfile.setBio(user.getBio());
         publicProfile.setCreatedAt(user.getCreatedAt());
-        publicProfile.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utils.getInitials(user.getName())));
+        publicProfile.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utiliy.getInitials(user.getName())));
         publicProfile.setCreatedCapsulesCount(Optional.ofNullable(user.getCreatedCapsuleIds()).map(List::size).orElse(0));
         publicProfile.setReceivedCapsulesCount(Optional.ofNullable(user.getReceivedCapsuleIds()).map(List::size).orElse(0));
 
