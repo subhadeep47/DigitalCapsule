@@ -21,6 +21,7 @@ public class Users {
     private String name;
     private String email;
     private String password;
+    private boolean verified;
     private String bio;
     private LocalDate createdAt;
     private String profilePictureUrl;

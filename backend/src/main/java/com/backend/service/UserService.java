@@ -25,8 +25,6 @@ public class UserService {
     @Autowired
     private AwsServices awsServices;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private Utiliy utiliy;
@@ -36,22 +34,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Users registerUser(Users user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("User already exists with email: " + user.getEmail());
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCreatedAt(LocalDate.now());
-        return userRepository.save(user);
-    }
-
-    public Users authenticateUser(String email, String password) {
-        Optional<Users> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
-            throw new RuntimeException("Invalid email or password.");
-        }
-        return userOpt.get();
-    }
 
     public Users getUserById(String id) {
         return userRepository.findById(id)

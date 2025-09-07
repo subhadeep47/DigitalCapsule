@@ -50,7 +50,7 @@ const Dashboard = () => {
   const fetchCurrentUser = async () => {
     try {
       setIsLoadingUser(true)
-      const currentUser = await api.get("/auth/me")
+      const currentUser = await api.get("/user/me")
       dispatchAction(dispatch, ACTION_TYPES.CURRENT_USER, currentUser.data)
       setIsLoadingUser(false)
     } catch (error) {
