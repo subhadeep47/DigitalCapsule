@@ -35,7 +35,7 @@ const ForgotPasswordPage = () => {
 
       const response = await api.post("/auth/forgot-password", { email: email.trim() })
 
-      if (response.data.success) {
+      if (response.data) {
         setIsEmailSent(true)
       }
     } catch (error) {

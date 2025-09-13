@@ -24,10 +24,8 @@ const ResetPasswordPage = () => {
   const [isValidating, setIsValidating] = useState(true)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState("")
-  const [userEmail, setUserEmail] = useState("")
   const [validationError, setValidationError] = useState("")
 
-  // Validate token on component mount
   useEffect(() => {
     let token = searchParams.get('token')
     setToken(token);
@@ -37,11 +35,7 @@ const ResetPasswordPage = () => {
   const validateToken = async (token) => {
     try {
       setIsValidating(true)
-      const response = await api.get(`/auth/validate-token?token=${token}`)
-
-      if (response.data.success) {
-        setUserEmail(response.data.email)
-      }
+      await api.get(`/auth/validate-token?token=${token}`)
     } catch (error) {
       console.error("Token validation error:", error)
       setValidationError(error.response?.data?.message || "Invalid or expired reset link")
@@ -64,8 +58,8 @@ const ResetPasswordPage = () => {
       return false
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long")
+    if (formData.password.length < 5) {
+      setError("Password must be at least 5 characters long")
       return false
     }
 
@@ -90,9 +84,8 @@ const ResetPasswordPage = () => {
         password: formData.password,
       })
 
-      if (response.data.success) {
+      if (response.data) {
         setIsSuccess(true)
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate("/auth")
         }, 3000)
@@ -216,7 +209,7 @@ const ResetPasswordPage = () => {
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">Reset Password</CardTitle>
             <p className="text-gray-600 mt-2">
-              Enter your new password for: <span className="font-semibold">{userEmail}</span>
+              Enter your new password
             </p>
           </CardHeader>
 
@@ -263,7 +256,7 @@ const ResetPasswordPage = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                   </button>
                 </div>
               </div>

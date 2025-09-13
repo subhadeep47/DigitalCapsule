@@ -10,6 +10,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -60,6 +61,36 @@ public class AuthController {
         response.setHeader("Set-Cookie", cookie.toString());
 
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request){
+        try {
+            authService.handleForgotPassword(request.get("email"));
+            return ResponseEntity.ok("Email sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Reset password failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/validate-token")
+    public  ResponseEntity<?> validateToken(@RequestParam String token){
+        try {
+            authService.handleValidateToken(token);
+            return ResponseEntity.ok("Validated token successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public  ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request, @RequestParam String token){
+        try {
+            authService.handleResetPassword(token, request.get("password"));
+            return ResponseEntity.ok("Reset password successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
+        }
     }
 
 }
