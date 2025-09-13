@@ -282,17 +282,6 @@ const Auth = () => {
         </div>
       </motion.div>
 
-      {/* Email Verification Modal
-      <EmailVerificationModal
-        isOpen={showEmailVerificationModal}
-        onClose={() => setShowEmailVerificationModal(false)}
-        email={unverifiedEmail}
-        onVerificationSuccess={() => {
-          setShowEmailVerificationModal(false)
-          alert("Email verified successfully! Please login again.")
-        }}
-      /> */}
-
     </div>
   )
 }
