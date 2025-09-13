@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { motion, AnimatePresence } from "framer-motion"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react"
@@ -15,6 +15,8 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [showEmailVerificationModal, setShowEmailVerificationModal] = useState(false)
+  const [unverifiedEmail, setUnverifiedEmail] = useState("")
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -88,10 +90,6 @@ const Auth = () => {
         navigate('/')
       }
       else{
-        // Store auth token if provided
-        if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token)
-        }
         localStorage.setItem("isLoggedIn", true)
         dispatchAction(dispatch, ACTION_TYPES.LOGIN)
         alert("Welcome back!")
@@ -99,6 +97,11 @@ const Auth = () => {
       }
     } catch (err) {
       console.error("Auth error:", err)
+      if (err.response?.data?.error === "EMAIL_NOT_VERIFIED") {
+        setUnverifiedEmail(err.response.data.email)
+        setShowEmailVerificationModal(true)
+        return
+      }
       const errorMessage =
         err.response?.data?.message || (isRegister ? "Failed to create account" : "Invalid email or password")
       setErrors({ submit: errorMessage })
@@ -110,10 +113,6 @@ const Auth = () => {
   const toggleMode = () => {
     const newMode = !isRegister
     setSearchParams(newMode ? { register: "true" } : {})
-  }
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
   }
 
   return (
@@ -229,7 +228,7 @@ const Auth = () => {
                   />
                   <button
                     type="button"
-                    onClick={togglePasswordVisibility}
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
@@ -239,6 +238,17 @@ const Auth = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
               </div>
+
+              {!isRegister && (
+                <div className="text-right">
+                  <Link
+                    to="/auth/forgot-password"
+                    className="text-purple-600 hover:text-purple-800 text-sm hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -271,6 +281,7 @@ const Auth = () => {
           </div>
         </div>
       </motion.div>
+
     </div>
   )
 }

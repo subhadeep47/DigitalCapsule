@@ -35,7 +35,7 @@ const RecipientSearchModal = ({ isOpen, onClose, selectedRecipients, onRecipient
     setHasSearched(true)
 
     try {
-      const results = await api.get(`/auth/search-recipient?query=${searchQuery}`)
+      const results = await api.get(`/user/search-recipient?query=${searchQuery}`)
       setSearchResults(results.data)
     } catch (error) {
       console.error("Search failed:", error)

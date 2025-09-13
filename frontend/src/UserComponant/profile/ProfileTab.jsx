@@ -83,7 +83,7 @@ const ProfileTab = ({ user }) => {
         }
       }
 
-      await api.put("/auth/update-profile", updatedUser)
+      await api.put("/user/update-profile", updatedUser)
 
       dispatchAction(dispatch, ACTION_TYPES.CURRENT_USER, updatedUser)
       setSuccessMessage("Profile updated successfully!")

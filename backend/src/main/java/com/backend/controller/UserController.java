@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/user")
 public class UserController {
 	
 	@Autowired
@@ -27,28 +27,6 @@ public class UserController {
 
     @Autowired
     private JwtUtils jwtUtil;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Users user) {
-        try {
-            Users registeredUser = usersService.registerUser(user);
-            return ResponseEntity.ok(registeredUser);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Users user, HttpServletResponse response) {
-        try {
-            Users authenticatedUser = usersService.authenticateUser(user.getEmail(), user.getPassword());
-            String token = jwtUtil.generateToken(authenticatedUser.getEmail());
-            jwtUtil.setJwtCookie(response, token);
-            return ResponseEntity.ok().body("logged in successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body("Login failed: " + e.getMessage());
-        }
-    }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
@@ -110,19 +88,5 @@ public class UserController {
         }
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-         ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                 .httpOnly(true)
-                 .secure(true)
-                 .sameSite("None")
-                 .path("/")
-                 .maxAge(0) // Expire immediately
-                 .build();
-
-         response.setHeader("Set-Cookie", cookie.toString());
-
-         return ResponseEntity.ok("Logged out successfully");
-     }
 
 }

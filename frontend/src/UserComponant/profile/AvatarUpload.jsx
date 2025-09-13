@@ -1,7 +1,7 @@
 "use client"
 import { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
-import { Camera, Upload, Loader2, Eye } from "lucide-react"
+import { Upload, Loader2, Eye } from "lucide-react"
 import { Button } from "../../Componants/UiElements/button"
 import { Tooltip, TooltipTrigger, TooltipProvider } from "../../Componants/UiElements/tooltip"
 import { dispatchAction, ACTION_TYPES } from "../../redux/actionDispatcher"
@@ -63,7 +63,7 @@ const AvatarUpload = ({ user }) => {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await api.post("/auth/update-profile-photo", formData, {
+      const response = await api.post("/user/update-profile-photo", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
