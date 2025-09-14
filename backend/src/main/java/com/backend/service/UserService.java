@@ -2,14 +2,12 @@ package com.backend.service;
 
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.backend.utils.Utiliy;
+import com.backend.utils.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.backend.dto.SearchUser;
@@ -27,7 +25,7 @@ public class UserService {
 
 
     @Autowired
-    private Utiliy utiliy;
+    private Utility utility;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -40,8 +38,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    public Optional<Users> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Users getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + email));
     }
 
     public void deleteUserById(String id) {
@@ -52,7 +51,7 @@ public class UserService {
     }
     
     public List<SearchUser> searchUsers(String query, String email) {
-    	Users currentUser = getUserByEmail(email).get();
+    	Users currentUser = getUserByEmail(email);
     	List<Users> queriedUsers = userRepository.findByEmailContainingIgnoreCaseOrNameContainingIgnoreCase(query, query);
     	List<SearchUser> searchUsers = new ArrayList<SearchUser>();
     	
@@ -61,7 +60,7 @@ public class UserService {
     			SearchUser searchUser = new SearchUser();
             	searchUser.setEmail(user.getEmail());
             	searchUser.setName(user.getName());
-            	searchUser.setAvatar(utiliy.getInitials(user.getName()));
+            	searchUser.setAvatar(utility.getInitials(user.getName()));
             	searchUsers.add(searchUser);
     		}
     	}
@@ -70,18 +69,20 @@ public class UserService {
     }
     
     public SearchUser getCurrentUser(String email){
-    	Users user = getUserByEmail(email).get();
+    	Users user = getUserByEmail(email);
     	SearchUser searchUser = new SearchUser();
     	searchUser.setEmail(email);
     	searchUser.setName(user.getName());
         searchUser.setBio(user.getBio());
-    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utiliy.getInitials(user.getName())));
+        searchUser.setVerified(user.isVerified());
+        searchUser.setVisibility((user.getVisibility()));
+    	searchUser.setAvatar(Optional.ofNullable(user.getProfilePictureUrl()).orElseGet(() -> utility.getInitials(user.getName())));
     	searchUser.setCreatedAt(user.getCreatedAt());
     	return searchUser;
     }
 
     public String updateProfilePhoto(MultipartFile file, String email) throws IOException {
-        Users user = getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = getUserByEmail(email);
         if(user.getProfilePictureUrl() != null ){
             awsServices.deleteFile(user.getProfilePictureUrl());
         }
@@ -92,7 +93,7 @@ public class UserService {
     }
 
     public void updateProfile(String email, SearchUser updatedUser) throws IOException{
-        Users user = getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = getUserByEmail(email);
         user.setName(updatedUser.getName());
         user.setBio(updatedUser.getBio());
         userRepository.save(user);

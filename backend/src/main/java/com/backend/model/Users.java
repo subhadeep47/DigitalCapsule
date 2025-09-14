@@ -3,6 +3,7 @@ package com.backend.model;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.backend.model.enums.VisibilityType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,6 +23,7 @@ public class Users {
     private String email;
     private String password;
     private boolean verified;
+    private VisibilityType visibility;
     private String bio;
     private LocalDate createdAt;
     private String profilePictureUrl;

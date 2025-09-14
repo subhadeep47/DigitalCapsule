@@ -3,7 +3,7 @@ package com.backend.utils;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Utiliy {
+public class Utility {
 
     public String getInitials(String name) {
         String[] names = name.split(" ");
