@@ -42,6 +42,7 @@ public class AuthService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(LocalDate.now());
+        user.setVerified(false);
         return userRepository.save(user);
     }
 
@@ -97,6 +98,52 @@ public class AuthService {
         Users user = userOpt.orElseThrow(() -> new IllegalArgumentException("User not found."));
 
         user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+
+        token.setConsumed(true);
+        tokenRepository.save(token);
+    }
+
+    public void handleOtpSend(String email) {
+        Optional<Users> userOpt = userRepository.findByEmail(email);
+        if(userOpt.isEmpty()){
+            throw new RuntimeException("User does not exists with email: " + email);
+        }
+        Users user = userOpt.get();
+        if(user.isVerified()){
+            throw new RuntimeException("User already verified with email: " + email);
+        }
+
+        tokenRepository.deleteByUserIdAndType(user.getId(), TokenType.VERIFY_EMAIL);
+
+        // generate new 6-digit OTP
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        Tokens token = new Tokens();
+        token.setUserId(user.getId());
+        token.setToken(otp);
+        token.setType(TokenType.VERIFY_EMAIL);
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        token.setConsumed(false);
+        tokenRepository.save(token);
+
+        // send email
+        mailService.sendOtpEmail(user.getEmail(), otp);
+
+
+    }
+
+    public void handleOtpVerification(String email, String otp) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        Tokens token = tokenRepository.findByTokenAndType(otp, TokenType.VERIFY_EMAIL)
+                .filter(t -> !t.isConsumed())
+                .filter(t -> t.getUserId().equals(user.getId()))
+                .filter(t -> t.getExpiresAt().isAfter(LocalDateTime.now()))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired OTP."));
+
+        user.setVerified(true);
         userRepository.save(user);
 
         token.setConsumed(true);

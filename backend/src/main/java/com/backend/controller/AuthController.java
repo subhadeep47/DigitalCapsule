@@ -93,4 +93,24 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request){
+        try {
+            authService.handleOtpSend(request.get("email"));
+            return ResponseEntity.ok("OTP sent to email successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Reset password failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public  ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request){
+        try {
+            authService.handleOtpVerification(request.get("email"), request.get("otp"));
+            return ResponseEntity.ok("Reset password successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
+        }
+    }
+
 }

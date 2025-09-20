@@ -14,7 +14,7 @@ const EmailVerificationModal = ({ isOpen, onClose, email, onVerificationSuccess 
   const handleSendOtp = async () => {
     try{
         setIsLoading(true)
-        const response = await api.post("/auth/verify-email", {
+        const response = await api.post("/auth/send-otp", {
             email
         })
 
@@ -23,7 +23,7 @@ const EmailVerificationModal = ({ isOpen, onClose, email, onVerificationSuccess 
         }
     } catch(error) {
         console.error("OTP sending error:", error)
-        setError(error.response?.data?.message || "Invalid OTP code. Please try again.")
+        setError(error.response?.data?.message || "Error while sending otp. Please try again.")
     } finally {
         setIsLoading(false)
     }

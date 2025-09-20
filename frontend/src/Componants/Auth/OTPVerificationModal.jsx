@@ -113,7 +113,7 @@ const OTPVerificationModal = ({ isOpen, onClose, email, onSuccess, title = "Veri
       setIsLoading(true)
       setError("")
 
-      const response = await api.post("/auth/verify-email", {
+      const response = await api.post("/auth/verify-otp", {
         email,
         otp: otpCode,
       })
