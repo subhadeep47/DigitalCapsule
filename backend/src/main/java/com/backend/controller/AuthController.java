@@ -99,7 +99,7 @@ public class AuthController {
             authService.handleOtpSend(request.get("email"));
             return ResponseEntity.ok("OTP sent to email successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Reset password failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body("OTP send failed: " + e.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public class AuthController {
     public  ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request){
         try {
             authService.handleOtpVerification(request.get("email"), request.get("otp"));
-            return ResponseEntity.ok("Reset password successfully");
+            return ResponseEntity.ok("OTP verification successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
         }

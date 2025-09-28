@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom"
 const CreateCapsule = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { isLoggedIn } = useSelector((state) => state.auth) || localStorage.getItem("isLoggedIn")
+  const { user } = useSelector((state) => state.auth)
   const { error } = useSelector((state) => state.capsules)
 
   const [capsuleData, setCapsuleData] = useState({
@@ -33,10 +33,11 @@ const CreateCapsule = () => {
   const isValid = capsuleData.title && capsuleData.description && capsuleData.recipientEmails && capsuleData.dateToUnlock
 
   useEffect(() => {
-      if (!isLoggedIn) {
-      navigate('/')
+    if(!user?.verified){
+      alert("Verify you email to get full access of Digital Capsule Application!")
+      navigate("/dashboard")
     }
-  }, [ isLoggedIn, navigate])
+  }, [ navigate, user])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
