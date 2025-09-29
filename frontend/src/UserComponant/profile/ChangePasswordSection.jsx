@@ -94,7 +94,7 @@ const ChangePasswordSection = ({ onPasswordChanged }) => {
               className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             >
-              {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {!showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -117,7 +117,7 @@ const ChangePasswordSection = ({ onPasswordChanged }) => {
               className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
               onClick={() => setShowNewPassword(!showNewPassword)}
             >
-              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {!showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -140,7 +140,7 @@ const ChangePasswordSection = ({ onPasswordChanged }) => {
               className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {!showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
         </div>

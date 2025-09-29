@@ -5,10 +5,12 @@ import { Mail, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "../../Componants/UiElements/button"
 import { Alert, AlertDescription } from "../../Componants/UiElements/alert"
 import { sendEmailVerificationOTP } from "../../actions/authAction"
+import OTPVerificationModal from "../../Componants/Auth/OTPVerificationModal"
 
 const EmailVerificationSection = ({ user, onVerificationSuccess }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
+  const [verificationModal, setVerificationModal] = useState(false)
   const [messageType, setMessageType] = useState("") // 'success' or 'error'
 
   const handleSendVerification = async () => {
@@ -18,11 +20,12 @@ const EmailVerificationSection = ({ user, onVerificationSuccess }) => {
     const result = await sendEmailVerificationOTP(user.email)
 
     if (result.success) {
-      setMessage("Verification code sent to your email")
-      setMessageType("success")
+        setVerificationModal(true)
+        setMessage("Verification code sent to your email")
+        setMessageType("success")
     } else {
-      setMessage(result.error)
-      setMessageType("error")
+        setMessage(result.error)
+        setMessageType("error")
     }
 
     setIsLoading(false)
@@ -66,6 +69,18 @@ const EmailVerificationSection = ({ user, onVerificationSuccess }) => {
         <Mail className="mr-2 h-4 w-4" />
         {isLoading ? "Sending..." : "Send Verification Code"}
       </Button>
+
+      <OTPVerificationModal
+        isOpen={verificationModal}
+        onClose={() => setVerificationModal(false)}
+        email={user?.email}
+        onSuccess={() => {
+          onVerificationSuccess()
+          setVerificationModal(false)
+          setMessage("Email validated successfully")
+        }}
+        title="Verify Your Email"
+      />
     </div>
   )
 }

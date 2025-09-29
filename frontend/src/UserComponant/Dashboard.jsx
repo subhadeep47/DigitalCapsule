@@ -263,7 +263,7 @@ const Dashboard = () => {
 
         {isVerified() && (
           <div className="mb-8">
-            <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} switchToTab={switchToTab} />
+            <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} onTabChange={switchToTab} />
           </div>
         )}
 

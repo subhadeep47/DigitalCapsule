@@ -7,7 +7,7 @@ import api from "../Utils/api"
  */
 export const sendEmailVerificationOTP = async (email) => {
   try {
-    const response = await api.post("/auth/send-verification-otp", { email })
+    const response = await api.post("/auth/send-otp", { email })
     return { success: true, data: response.data }
   } catch (error) {
     return {
@@ -25,7 +25,7 @@ export const sendEmailVerificationOTP = async (email) => {
  */
 export const verifyEmailOTP = async (email, otp) => {
   try {
-    const response = await api.post("/auth/verify-email-otp", { email, otp })
+    const response = await api.post("/auth/verify-otp", { email, otp })
     return { success: true, data: response.data }
   } catch (error) {
     return {
@@ -114,3 +114,4 @@ export const resetPassword = async (token, newPassword) => {
     }
   }
 }
+
