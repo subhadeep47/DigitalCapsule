@@ -34,7 +34,7 @@ const ChangeEmailSection = ({ currentEmail, onEmailChanged }) => {
     setIsLoading(true)
     setMessage("")
 
-    const result = await changeEmail(newEmail, password)
+    const result = await changeEmail(currentEmail, newEmail, password)
 
     if (result.success) {
       setMessage("Email change request sent. Please check your new email for verification.")
@@ -95,6 +95,9 @@ const ChangeEmailSection = ({ currentEmail, onEmailChanged }) => {
               {!showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
+          <p className="mt-2 text-sm text-yellow-300 bg-yellow-900/20 border border-yellow-700 rounded px-3 py-2">
+            <strong>Note:</strong> you need to verify your email after changing the email.
+          </p>
         </div>
 
         {message && (

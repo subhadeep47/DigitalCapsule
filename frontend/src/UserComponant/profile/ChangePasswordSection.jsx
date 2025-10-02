@@ -8,7 +8,7 @@ import { Label } from "../../Componants/UiElements/label"
 import { Alert, AlertDescription } from "../../Componants/UiElements/alert"
 import { changePassword } from "../../actions/authAction"
 
-const ChangePasswordSection = ({ onPasswordChanged }) => {
+const ChangePasswordSection = () => {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -34,8 +34,8 @@ const ChangePasswordSection = ({ onPasswordChanged }) => {
       return
     }
 
-    if (newPassword.length < 6) {
-      setMessage("New password must be at least 6 characters long")
+    if (newPassword.length < 5) {
+      setMessage("New password must be at least 5 characters long")
       setMessageType("error")
       return
     }
@@ -57,9 +57,6 @@ const ChangePasswordSection = ({ onPasswordChanged }) => {
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
-      if (onPasswordChanged) {
-        onPasswordChanged()
-      }
     } else {
       setMessage(result.error)
       setMessageType("error")

@@ -12,7 +12,7 @@ export const sendEmailVerificationOTP = async (email) => {
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to send verification code",
+      error: error.response?.data || "Failed to send verification code",
     }
   }
 }
@@ -30,7 +30,7 @@ export const verifyEmailOTP = async (email, otp) => {
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Invalid verification code",
+      error: error.response?.data || "Invalid verification code",
     }
   }
 }
@@ -41,17 +41,18 @@ export const verifyEmailOTP = async (email, otp) => {
  * @param {string} password - Current password for verification
  * @returns {Promise} - API response
  */
-export const changeEmail = async (newEmail, password) => {
+export const changeEmail = async (oldEmail, newEmail, password) => {
   try {
     const response = await api.post("/auth/change-email", {
+      oldEmail,
       newEmail,
-      currentPassword: password,
+      password,
     })
     return { success: true, data: response.data }
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to change email",
+      error: error.response?.data || "Failed to change email",
     }
   }
 }
@@ -72,7 +73,7 @@ export const changePassword = async (currentPassword, newPassword) => {
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to change password",
+      error: error.response?.data || "Failed to change password",
     }
   }
 }
@@ -89,7 +90,7 @@ export const sendForgotPasswordEmail = async (email) => {
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to send reset email",
+      error: error.response?.data || "Failed to send reset email",
     }
   }
 }
@@ -110,7 +111,7 @@ export const resetPassword = async (token, newPassword) => {
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to reset password",
+      error: error.response?.data || "Failed to reset password",
     }
   }
 }

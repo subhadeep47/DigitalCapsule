@@ -5,8 +5,11 @@ import com.backend.model.Users;
 import com.backend.model.enums.TokenType;
 import com.backend.repositories.TokenRepository;
 import com.backend.repositories.UserRepository;
+import com.backend.utils.JwtUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,9 @@ public class AuthService {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Autowired
     public AuthService(UserRepository userRepository, TokenRepository tokenRepository){
@@ -148,5 +154,41 @@ public class AuthService {
 
         token.setConsumed(true);
         tokenRepository.save(token);
+    }
+
+    public void handleEmailChange(String oldEmail, String newEmail, String password) {
+        Users user = authenticateUser(oldEmail, password);
+
+        if (userRepository.findByEmail(newEmail).isPresent()) {
+            throw new RuntimeException("User already exists with the new email: " + newEmail);
+        }
+
+        user.setEmail(newEmail);
+        user.setVerified(false);
+
+        userRepository.save(user);
+    }
+
+    public void handleNewTokenGeneration(String newEmail, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.setHeader("Set-Cookie", cookie.toString());
+
+        String token = jwtUtils.generateToken(newEmail);
+        jwtUtils.setJwtCookie(response, token);
+
+    }
+
+    public void handlePasswordChange(String currentPassword, String newPassword, String email) {
+        Users user = authenticateUser(email, currentPassword);
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

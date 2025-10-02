@@ -18,11 +18,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="auth" element={<Auth />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path='/auth/forgot-password' element={<ForgotPasswordPage />} />
-            <Route path='auth/reset-password' element={<ResetPasswordPage />} />
+            <Route path='/auth/reset-password' element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="create" element={<CreateCapsule />} />
+            <Route path="/create" element={<CreateCapsule />} />
             <Route path='/profile' element={<ProfileSettingsPage />} />
             <Route path="/profile/:userId" element={<PublicProfilePage />} /> 
           </Route>
