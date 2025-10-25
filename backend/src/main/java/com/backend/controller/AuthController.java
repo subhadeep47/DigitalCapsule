@@ -4,6 +4,7 @@ import com.backend.model.Users;
 import com.backend.service.AuthService;
 import com.backend.service.MailService;
 import com.backend.utils.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -90,6 +90,48 @@ public class AuthController {
             return ResponseEntity.ok("Reset password successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request){
+        try {
+            authService.handleOtpSend(request.get("email"));
+            return ResponseEntity.ok("OTP sent to email successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("OTP send failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public  ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request){
+        try {
+            authService.handleOtpVerification(request.get("email"), request.get("otp"));
+            return ResponseEntity.ok("OTP verification successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("validate token failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-email")
+    public ResponseEntity<?> changeEmail(@RequestBody Map<String, String> request, HttpServletResponse response){
+        try{
+            authService.handleEmailChange(request.get("oldEmail"), request.get("newEmail"), request.get("password"));
+            authService.handleNewTokenGeneration(request.get("newEmail"), response);
+            return ResponseEntity.ok("Email changed successfully");
+        } catch(Exception e){
+            return ResponseEntity.badRequest().body("Email address change failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request, HttpServletRequest req){
+        try{
+            String email = jwtUtil.extractEmail(jwtUtil.extractJwtFromCookies(req));
+            authService.handlePasswordChange(request.get("currentPassword"), request.get("newPassword"), email);
+            return ResponseEntity.ok("Password changed successfully");
+        } catch(Exception e){
+            return ResponseEntity.badRequest().body("Password change failed: " + e.getMessage());
         }
     }
 

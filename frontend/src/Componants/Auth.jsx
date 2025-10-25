@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react"
 import api from "../Utils/api"
 import { ACTION_TYPES, dispatchAction } from "../redux/actionDispatcher"
+import EmailVerificationModal from "./Auth/EmailVerificationModal"
 
 const Auth = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -16,7 +17,6 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [showEmailVerificationModal, setShowEmailVerificationModal] = useState(false)
-  const [unverifiedEmail, setUnverifiedEmail] = useState("")
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -85,11 +85,10 @@ const Auth = () => {
       const endpoint = isRegister ? "/auth/register" : "/auth/login"
       const response = await api.post(endpoint, userDetails)
 
-      if(isRegister){
-        alert("Account created successfully!")
-        navigate('/')
+      if(response.data && isRegister){
+        setShowEmailVerificationModal(true)
       }
-      else{
+      else if(response.data && !isRegister){
         localStorage.setItem("isLoggedIn", true)
         dispatchAction(dispatch, ACTION_TYPES.LOGIN)
         alert("Welcome back!")
@@ -97,11 +96,6 @@ const Auth = () => {
       }
     } catch (err) {
       console.error("Auth error:", err)
-      if (err.response?.data?.error === "EMAIL_NOT_VERIFIED") {
-        setUnverifiedEmail(err.response.data.email)
-        setShowEmailVerificationModal(true)
-        return
-      }
       const errorMessage =
         err.response?.data?.message || (isRegister ? "Failed to create account" : "Invalid email or password")
       setErrors({ submit: errorMessage })
@@ -281,7 +275,20 @@ const Auth = () => {
           </div>
         </div>
       </motion.div>
-
+      {/* Email Verification Modal */}
+      <EmailVerificationModal
+        isOpen={showEmailVerificationModal}
+        onClose={() => {
+          setShowEmailVerificationModal(false)
+          navigate("/auth")
+        }}
+        email={userDetails.email}
+        onVerificationSuccess={() => {
+          setShowEmailVerificationModal(false)
+          alert("Email verified successfully!")
+          navigate("/auth")
+        }}
+      />
     </div>
   )
 }

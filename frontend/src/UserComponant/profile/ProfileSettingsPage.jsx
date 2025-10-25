@@ -1,35 +1,25 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { ArrowLeft, User } from "lucide-react"
+import { ArrowLeft, Shield, User } from "lucide-react"
 import { Button } from "../../Componants/UiElements/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../Componants/UiElements/tabs"
 import ProfileHeader from "./ProfileHeader"
 import ProfileTab from "./ProfileTab"
+import AuthTab from "./AuthTab"
 
 const ProfileSettingsPage = () => {
   const navigate = useNavigate()
-  const { isLoggedIn, user } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth)
   const { dashboardSummary } = useSelector((state) => state.capsules)
 
   const [activeTab, setActiveTab] = useState("profile")
 
-  useEffect(() => {
-    const loggedIn = isLoggedIn || localStorage.getItem("isLoggedIn")
-    if (!loggedIn) {
-      navigate("/")
-      return
-    }
-  }, [isLoggedIn, navigate])
-
   const handleBackToDashboard = () => {
     navigate("/dashboard")
   }
-
-  const loggedIn = isLoggedIn || localStorage.getItem("isLoggedIn")
-  if (!loggedIn) return null
 
   const getUserStats = () => {
     if (!dashboardSummary) return null
@@ -76,10 +66,17 @@ const ProfileSettingsPage = () => {
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </TabsTrigger>
+              <TabsTrigger value="auth" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                Authentication
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="mt-6">
               <ProfileTab user={user} />
+            </TabsContent>
+            <TabsContent value="auth" className="mt-6">
+              <AuthTab user={user} />
             </TabsContent>
           </Tabs>
         </motion.div>

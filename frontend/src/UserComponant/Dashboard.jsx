@@ -17,6 +17,7 @@ import api from "../Utils/api"
 import UserProfileHeader from "./dashboard/UserProfileHeader";
 import DashboardSummary from "./dashboard/DashboardSummary";
 import UserSearchModal from "./social/UserSearchModal";
+import VerificationBanner from "./dashboard/VerificationBanner";
 
 
 const Dashboard = () => {
@@ -33,7 +34,7 @@ const Dashboard = () => {
     activeTab,
     error,
   } = useSelector((state) => state.capsules)
-  const { isLoggedIn } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth)
 
   // Local loading states
   const [isLoadingMyCapsules, setIsLoadingMyCapsules] = useState(false)
@@ -96,18 +97,10 @@ const Dashboard = () => {
 
   // Initial load
   useEffect(() => {
-    const loggedIn = isLoggedIn || localStorage.getItem("isLoggedIn")
-    if (loggedIn) {
-      if (!isLoggedIn) {
-        dispatchAction(dispatch, ACTION_TYPES.LOGIN)
-      }
-      fetchCurrentUser()
-      fetchMyCapsules(1)
-      fetchReceivedCapsules(1)
-    } else {
-      navigate("/")
-    }
-  }, [isLoggedIn, navigate, dispatch])
+    fetchCurrentUser()
+    fetchMyCapsules(1)
+    fetchReceivedCapsules(1)
+  }, [])
 
   // Handle pagination for my capsules
   const handleMyPageChange = (page) => {
@@ -203,8 +196,13 @@ const Dashboard = () => {
     dispatchAction(dispatch, ACTION_TYPES.SET_MODAL_OPEN, false)
   }
 
-  const loggedIn = isLoggedIn || localStorage.getItem("isLoggedIn")
-  if (!loggedIn) return null
+   const handleVerificationSuccess = () => {
+    fetchCurrentUser()
+  }
+
+  const isVerified = () => {
+    return user ? user.verified : false;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-indigo-900 text-white p-4 md:p-8">
@@ -228,6 +226,10 @@ const Dashboard = () => {
           )}
         </header>
 
+        {!isVerified() && (
+          <VerificationBanner userEmail={user?.email} onVerificationSuccess={handleVerificationSuccess} />
+        )}
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-80">
@@ -244,8 +246,9 @@ const Dashboard = () => {
           <div className="flex gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setIsUserSearchModalOpen(true)}
+              disabled={!isVerified()}
               variant="outline"
-              className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:border-indigo-500 w-full sm:w-auto"
+              className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:border-indigo-500 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Users className="mr-2 h-4 w-4" /> Discover Users
             </Button>
@@ -258,35 +261,13 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
-            <p>Error: {error}</p>
-            <button
-              type="button"
-              onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
-              className="mt-2 text-sm underline hover:no-underline"
-            >
-              Dismiss
-            </button>
+        {isVerified() && (
+          <div className="mb-8">
+            <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} onTabChange={switchToTab} />
           </div>
         )}
 
-        {/* Stats Cards depreciated after introducing enhanced DashboardSummary
-        <StatsCard
-          myCapsules={myCapsules}
-          receivedCapsules={receivedCapsules}
-          myPagination={myPagination}
-          receivedPagination={receivedPagination}
-          isLoadingMyCapsules={isLoadingMyCapsules}
-          isLoadingReceivedCapsules={isLoadingReceivedCapsules}
-        /> */}
-
-        <div className="mb-8">
-          <DashboardSummary onViewCapsule={handleViewCapsuleFromSummary} onTabChange={switchToTab} />
-        </div>
-
-        {/* Tabs for My Capsules and Received Capsules */}
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8" id="capsule-tabs-section">
           <TabsList className="bg-slate-800/50 border-slate-700">
             <TabsTrigger value="my-capsules">
@@ -340,11 +321,26 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Capsule Detail Modal */}
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-300">
+            <p>Error: {error}</p>
+            <button
+              type="button"
+              onClick={() => dispatchAction(dispatch, ACTION_TYPES.CLEAR_ERROR)}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Modals */}
         <CapsuleDetailModal capsule={selectedCapsule} isOpen={isModalOpen} onClose={handleCloseModal} />
 
-        {/* User Search Modal */}
-        <UserSearchModal isOpen={isUserSearchModalOpen} onClose={() => setIsUserSearchModalOpen(false)} />
+        {isVerified() && (
+          <UserSearchModal isOpen={isUserSearchModalOpen} onClose={() => setIsUserSearchModalOpen(false)} />
+        )}
       </div>
     </div>
   )
