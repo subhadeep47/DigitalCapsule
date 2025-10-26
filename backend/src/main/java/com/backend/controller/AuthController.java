@@ -2,7 +2,6 @@ package com.backend.controller;
 
 import com.backend.model.Users;
 import com.backend.service.AuthService;
-import com.backend.service.MailService;
 import com.backend.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,9 +21,6 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtil;
-
-    @Autowired
-    private MailService mailService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
