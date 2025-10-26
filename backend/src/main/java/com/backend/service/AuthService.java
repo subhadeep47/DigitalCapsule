@@ -31,7 +31,7 @@ public class AuthService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private MailService mailService;
+    private EmailService mailService;
 
     @Autowired
     private JwtUtils jwtUtils;

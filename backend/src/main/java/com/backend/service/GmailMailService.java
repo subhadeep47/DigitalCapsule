@@ -1,16 +1,19 @@
 package com.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MailService {
+@Profile("dev")
+public class GmailMailService implements EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
+    @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("digital.capsule.official@gmail.com");
@@ -22,6 +25,7 @@ public class MailService {
         mailSender.send(message);
     }
 
+    @Override
     public void sendOtpEmail(String to, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("digital.capsule.official@gmail.com");
