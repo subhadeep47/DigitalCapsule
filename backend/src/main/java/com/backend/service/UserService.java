@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.backend.model.enums.VisibilityType;
 import com.backend.utils.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class UserService {
     	List<SearchUser> searchUsers = new ArrayList<SearchUser>();
     	
     	for(Users user: queriedUsers) {
-    		if(!user.getEmail().equals(currentUser.getEmail())) {
+    		if(!user.getEmail().equals(currentUser.getEmail()) && ( user.getVisibility() == null || user.getVisibility().equals(VisibilityType.PUBLIC_VISIBLE))) {
     			SearchUser searchUser = new SearchUser();
             	searchUser.setEmail(user.getEmail());
             	searchUser.setName(user.getName());
@@ -96,6 +97,7 @@ public class UserService {
         Users user = getUserByEmail(email);
         user.setName(updatedUser.getName());
         user.setBio(updatedUser.getBio());
+        user.setVisibility(updatedUser.getVisibility());
         userRepository.save(user);
     }
 }

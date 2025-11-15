@@ -16,7 +16,7 @@ const ProfileTab = ({ user }) => {
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
-    isProfilePublic: false
+    visibility: 'PUBLIC_VISIBLE'
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
@@ -27,7 +27,7 @@ const ProfileTab = ({ user }) => {
       setFormData({
         name: user.name || "",
         bio: user.bio || "",
-        isProfilePublic: user.isProfilePublic || false
+        visibility: user.visibility || 'PUBLIC_VISIBLE'
       })
     }
   }, [user])
@@ -48,6 +48,13 @@ const ProfileTab = ({ user }) => {
     if (successMessage) {
       setSuccessMessage("")
     }
+  }
+
+  const handleVisibilityChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      visibility: value ? 'PUBLIC_VISIBLE' : 'ONLY_ME_VISIBLE',
+    }))
   }
 
   const validateForm = () => {
@@ -83,6 +90,7 @@ const ProfileTab = ({ user }) => {
         ...{
           name: formData.name.trim(),
           bio: formData.bio.trim(),
+          visibility: formData.visibility
         }
       }
 
@@ -107,7 +115,9 @@ const ProfileTab = ({ user }) => {
 
   const hasChanges = () => {
     if (!user) return false
-    return formData.name !== (user.name || "") || formData.bio !== (user.bio || "")
+    return ["name", "bio", "visibility"].some(
+        key => (formData[key] ?? "") !== (user[key] ?? "")
+      );
   }
 
   return (
@@ -184,8 +194,8 @@ const ProfileTab = ({ user }) => {
             </div>
             <div className="flex-shrink-0 ml-4">
               <Switch
-                checked={formData.isProfilePublic}
-                onCheckedChange={(checked) => handleInputChange("isProfilePublic", checked)}
+                checked={formData.visibility === 'PUBLIC_VISIBLE' ? true : false}
+                onCheckedChange={(checked) => handleVisibilityChange(checked)} //handling seperately until friends features integrates
                 className="data-[state=checked]:bg-indigo-600"
               />
             </div>
