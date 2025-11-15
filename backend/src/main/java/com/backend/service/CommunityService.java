@@ -3,6 +3,7 @@ package com.backend.service;
 import com.backend.dto.PublicProfile;
 import com.backend.dto.SearchUser;
 import com.backend.model.Users;
+import com.backend.model.enums.VisibilityType;
 import com.backend.repositories.UserRepository;
 import com.backend.utils.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class CommunityService {
         List<SearchUser> searchUsers = new ArrayList<SearchUser>();
 
         for(Users user: queriedUsers) {
-            if(!user.getEmail().equals(currentUser.getEmail())) {
+            if(!user.getEmail().equals(currentUser.getEmail()) && ( user.getVisibility() == null || user.getVisibility().equals(VisibilityType.PUBLIC_VISIBLE))) {
                 SearchUser searchUser = new SearchUser();
                 searchUser.setUserId(user.getId());
                 searchUser.setEmail(user.getEmail());
